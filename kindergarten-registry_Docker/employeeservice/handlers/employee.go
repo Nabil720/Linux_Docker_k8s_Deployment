@@ -1,0 +1,125 @@
+package handlers
+
+import (
+	"context"
+	"encoding/json"
+	"net/http"
+	"time"
+	"employeeservice/database"
+	"employeeservice/models"
+
+	"go.mongodb.org/mongo-driver/bson"
+)
+
+func GetEmployees(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	collection := database.GetCollection("employees")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	cursor, err := collection.Find(ctx, bson.M{})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer cursor.Close(ctx)
+
+	var employees []models.Employee
+	if err = cursor.All(ctx, &employees); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(employees)
+}
+
+func AddEmployee(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	
+	var employee models.Employee
+	if err := json.NewDecoder(r.Body).Decode(&employee); err != nil {
+		http.Error(w, "Invalid input", http.StatusBadRequest)
+		return
+	}
+
+	collection := database.GetCollection("employees")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// Check if employee already exists
+	existing := collection.FindOne(ctx, bson.M{"id": employee.ID})
+	if existing.Err() == nil {
+		http.Error(w, "Employee with this ID already exists", http.StatusConflict)
+		return
+	}
+
+	_, err := collection.InsertOne(ctx, employee)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(employee)
+}
+
+func DeleteEmployee(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	
+	id := r.URL.Query().Get("id")
+	if id == "" {
+		http.Error(w, "ID parameter missing", http.StatusBadRequest)
+		return
+	}
+
+	collection := database.GetCollection("employees")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	result, err := collection.DeleteOne(ctx, bson.M{"id": id})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if result.DeletedCount == 0 {
+		http.Error(w, "Employee not found", http.StatusNotFound)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{"message": "Employee deleted successfully"})
+}
+
+func UpdateEmployee(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	
+	var updated models.Employee
+	if err := json.NewDecoder(r.Body).Decode(&updated); err != nil {
+		http.Error(w, "Invalid input", http.StatusBadRequest)
+		return
+	}
+
+	collection := database.GetCollection("employees")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	result, err := collection.UpdateOne(
+		ctx,
+		bson.M{"id": updated.ID},
+		bson.M{"$set": updated},
+	)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if result.MatchedCount == 0 {
+		http.Error(w, "Employee not found", http.StatusNotFound)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(updated)
+}
