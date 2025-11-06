@@ -7,7 +7,7 @@ metadata:
     nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   rules:
-    - host: "192.168.56.10.nip.io"  # No host file needed!
+    - host: "192.168.121.180"
       http:
         paths:
           - path: /
@@ -17,21 +17,21 @@ spec:
                 name: frontend
                 port:
                   number: 80
-          - path: /api/students
+          - path: /students
             pathType: Prefix
             backend:
               service:
                 name: student-service
                 port:
                   number: 5001
-          - path: /api/teachers
+          - path: /teachers
             pathType: Prefix
             backend:
               service:
                 name: teacher-service
                 port:
                   number: 5002
-          - path: /api/employees
+          - path: /employees
             pathType: Prefix
             backend:
               service:
