@@ -1,0 +1,65 @@
+package main
+
+import (
+	"log"
+	"net/http"
+	"employeeservice/database" 
+	"employeeservice/handlers"
+)
+
+func enableCors(w http.ResponseWriter) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+}
+
+func main() {
+	// Database connection
+	if err := database.Connect(); err != nil {
+		log.Fatal("Database connection failed:", err)
+	}
+
+	// Employee Routes
+	http.HandleFunc("/add-employee", func(w http.ResponseWriter, r *http.Request) {
+		enableCors(w)
+		if r.Method == http.MethodOptions {
+			return
+		}
+		handlers.AddEmployee(w, r)
+	})
+
+	http.HandleFunc("/employees", func(w http.ResponseWriter, r *http.Request) {
+		enableCors(w)
+		if r.Method == http.MethodOptions {
+			return
+		}
+		handlers.GetEmployees(w, r)
+	})
+
+	http.HandleFunc("/delete-employee", func(w http.ResponseWriter, r *http.Request) {
+		enableCors(w)
+		if r.Method == http.MethodOptions {
+			return
+		}
+		if r.Method != http.MethodDelete {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+		handlers.DeleteEmployee(w, r)
+	})
+
+	http.HandleFunc("/update-employee", func(w http.ResponseWriter, r *http.Request) {
+		enableCors(w)
+		if r.Method == http.MethodOptions {
+			return
+		}
+		if r.Method != http.MethodPut {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+		handlers.UpdateEmployee(w, r)
+	})
+
+	log.Println("Employee Service running on port 5003")
+	log.Fatal(http.ListenAndServe(":5003", nil))
+}
