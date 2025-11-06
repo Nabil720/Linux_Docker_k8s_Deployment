@@ -7,7 +7,7 @@ metadata:
     nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   rules:
-    - host: kindergarten.local  # আপনার domain বা localhost
+    - host: "192.168.56.10.nip.io"  # No host file needed!
       http:
         paths:
           - path: /
