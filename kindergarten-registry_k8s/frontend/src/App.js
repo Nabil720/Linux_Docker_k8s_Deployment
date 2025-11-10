@@ -15,9 +15,9 @@ function App() {
   const [activeTab, setActiveTab] = useState("students");
 
   // API Base URLs for each service
-  const STUDENT_SERVICE_URL = "http://localhost:5001";
-  const TEACHER_SERVICE_URL = "http://localhost:5002";
-  const EMPLOYEE_SERVICE_URL = "http://localhost:5003";
+  const STUDENT_SERVICE_URL = "http://student-service:5001";
+  const TEACHER_SERVICE_URL = "http://teacher-service:5002";
+  const EMPLOYEE_SERVICE_URL = "http://employee-service:5003";
 
   const fetchStudents = () => {
     fetch(`${STUDENT_SERVICE_URL}/students`)
