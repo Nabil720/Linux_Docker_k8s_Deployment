@@ -17,13 +17,6 @@ spec:
         image: nanil0034/kindergarten-registry-frontend:14
         ports:
         - containerPort: 3000
-        env:
-          - name: REACT_APP_STUDENT_SERVICE_URL
-            value: "http://student-service:5001"
-          - name: REACT_APP_TEACHER_SERVICE_URL
-            value: "http://teacher-service:5002"
-          - name: REACT_APP_EMPLOYEE_SERVICE_URL
-            value: "http://employee-service:5003"
 ---
 apiVersion: v1
 kind: Service
@@ -36,4 +29,5 @@ spec:
     - protocol: TCP
       port: 80
       targetPort: 3000
-  type:  ClusterIP
+      nodePort: 30000
+  type: NodePort
