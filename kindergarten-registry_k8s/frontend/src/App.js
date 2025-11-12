@@ -15,12 +15,13 @@ function App() {
   const [activeTab, setActiveTab] = useState("students");
 
   // API Base URLs for each service
-  const STUDENT_SERVICE_URL = "https://nasirtechtalks.com";
-  const TEACHER_SERVICE_URL = "https://nasirtechtalks.com";
-  const EMPLOYEE_SERVICE_URL = "https://nasirtechtalks.com";
+  const BASE_URL = "https://nasirtechtalks.com/";
+  // const STUDENT_SERVICE_URL = "https://nasirtechtalks.com";
+  // const TEACHER_SERVICE_URL = "https://nasirtechtalks.com";
+  // const EMPLOYEE_SERVICE_URL = "https://nasirtechtalks.com";
 
   const fetchStudents = () => {
-    fetch(`${STUDENT_SERVICE_URL}/students`)
+    fetch(`${BASE_URL}/student/students`)
       .then((res) => {
         if (!res.ok) {
           throw new Error(`Student service error: ${res.status}`);
@@ -63,7 +64,7 @@ function App() {
 
   const addStudent = async (student) => {
     try {
-      await fetch(`${STUDENT_SERVICE_URL}/student/add-student`, {
+      await fetch(`${BASE_URL}/student/add-student`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(student),
@@ -106,7 +107,7 @@ function App() {
   const handleDeleteStudent = async (roll) => {
     if (window.confirm("Are you sure you want to delete this student?")) {
       try {
-        await fetch(`${STUDENT_SERVICE_URL}/students/delete-student?roll=${roll}`, {
+        await fetch(`${BASE_URL}/student/delete-student?roll=${roll}`, {
           method: "DELETE",
         });
         fetchStudents();
@@ -148,7 +149,7 @@ function App() {
   // Edit handlers
   const handleEditStudent = async (updatedStudent) => {
     try {
-      await fetch(`${STUDENT_SERVICE_URL}/students/update-student`, {
+      await fetch(`${BASE_URL}/student/update-student`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedStudent),

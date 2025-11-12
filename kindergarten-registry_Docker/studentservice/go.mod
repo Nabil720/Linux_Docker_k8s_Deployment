@@ -1,10 +1,11 @@
-module studentservice
+module employeeservice
 
-go 1.23.0
+go 1.23
 
-toolchain go1.24.10
-
-require go.mongodb.org/mongo-driver v1.15.0
+require (
+    go.mongodb.org/mongo-driver v1.15.0
+    go.elastic.co/apm/v2 v2.4.7
+)
 
 require (
 	github.com/armon/go-radix v1.0.0 // indirect
@@ -20,7 +21,6 @@ require (
 	github.com/xdg-go/scram v1.1.2 // indirect
 	github.com/xdg-go/stringprep v1.0.4 // indirect
 	github.com/youmark/pkcs8 v0.0.0-20181117223130-1be2e3e5546d // indirect
-	go.elastic.co/apm/v2 v2.4.7 // indirect
 	go.elastic.co/fastjson v1.5.1 // indirect
 	golang.org/x/crypto v0.17.0 // indirect
 	golang.org/x/sync v0.11.0 // indirect

@@ -6,38 +6,41 @@ import (
 	"employeeservice/database" 
 	"employeeservice/handlers"
 	
-	_ "go.elastic.co/apm/v2"
+	"go.elastic.co/apm/v2" 
 )
 
-// APM configuration
 func initAPM() {
-	// APM server configuration
-	err := apm.InitDefaultTracer(
-		apm.WithServiceName("employee-service"),
-		apm.WithServiceVersion("1.0.0"),
-		apm.WithServiceEnvironment("development"),
-		apm.WithServerURL("http://192.168.56.114:8200"),
-		apm.WithSecretToken("thO5a5ISLcoTrogIcH8XljEPRLs9uqoswl"),
-	)
+	// In newer APM versions, the tracer is automatically initialized
+	// from environment variables. We don't need manual initialization.
 	
-	if err != nil {
-		log.Printf("APM initialization failed: %v", err)
-	} else {
+	// Check if APM is working
+	if apm.DefaultTracer().Active() {
 		log.Println("APM initialized successfully for Employee Service")
+	} else {
+		log.Println("APM is not active - check environment variables")
 	}
 }
 
-// APM middleware
+// SIMPLIFIED APM middleware - FIXED VERSION
 func apmMiddleware(handler http.HandlerFunc, operationName string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// Start transaction
-		tx := apm.DefaultTracer().StartTransaction(operationName, "request")
+		// Check if APM tracer is available before using it
+		tracer := apm.DefaultTracer()
+		if tracer == nil || !tracer.Active() {
+			// If APM is not available, just call the handler directly
+			handler(w, r)
+			return
+		}
+		
+		// Start transaction - CORRECT WAY
+		tx := tracer.StartTransaction(operationName, "request")
 		defer tx.End()
 		
+		// Set transaction context
 		ctx := apm.ContextWithTransaction(r.Context(), tx)
 		req := r.WithContext(ctx)
 		
-		// Add context to request
+		// Call the handler
 		handler(w, req)
 	}
 }
