@@ -15,12 +15,12 @@ function App() {
   const [activeTab, setActiveTab] = useState("students");
 
   // API Base URLs for each service
-  // const STUDENT_SERVICE_URL = "http://localhost:5001";
-  // const TEACHER_SERVICE_URL = "http://localhost:5002";
-  // const EMPLOYEE_SERVICE_URL = "http://localhost:5003";
+  const STUDENT_SERVICE_URL = "http://student:5001";
+  const TEACHER_SERVICE_URL = "http://teacher:5002";
+  const EMPLOYEE_SERVICE_URL = "http://employee:5003";
 
   const fetchStudents = () => {
-    fetch(`/students`)
+    fetch(`${STUDENT_SERVICE_URL}/students`)
       .then((res) => {
         if (!res.ok) {
           throw new Error(`Student service error: ${res.status}`);
@@ -32,7 +32,7 @@ function App() {
   };
 
   const fetchTeachers = () => {
-    fetch(`/teachers`)
+    fetch(`${TEACHER_SERVICE_URL}/teachers`)
       .then((res) => {
         if (!res.ok) {
           throw new Error(`Teacher service error: ${res.status}`);
@@ -44,7 +44,7 @@ function App() {
   };
 
   const fetchEmployees = () => {
-    fetch(`/employees`)
+    fetch(`${EMPLOYEE_SERVICE_URL}/employees`)
       .then((res) => {
         if (!res.ok) {
           throw new Error(`Employee service error: ${res.status}`);
@@ -63,7 +63,7 @@ function App() {
 
   const addStudent = async (student) => {
     try {
-      await fetch(`/add-student`, {
+      await fetch(`${STUDENT_SERVICE_URL}/add-student`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(student),
@@ -77,7 +77,7 @@ function App() {
 
   const addTeacher = async (teacher) => {
     try {
-      await fetch(`/add-teacher`, {
+      await fetch(`${TEACHER_SERVICE_URL}/add-teacher`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(teacher),
@@ -91,7 +91,7 @@ function App() {
 
   const addEmployee = async (employee) => {
     try {
-      await fetch(`/add-employee`, {
+      await fetch(`${EMPLOYEE_SERVICE_URL}/add-employee`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(employee),
@@ -106,7 +106,7 @@ function App() {
   const handleDeleteStudent = async (roll) => {
     if (window.confirm("Are you sure you want to delete this student?")) {
       try {
-        await fetch(`/delete-student?roll=${roll}`, {
+        await fetch(`${STUDENT_SERVICE_URL}/delete-student?roll=${roll}`, {
           method: "DELETE",
         });
         fetchStudents();
@@ -120,7 +120,7 @@ function App() {
   const handleDeleteTeacher = async (id) => {
     if (window.confirm("Are you sure you want to delete this teacher?")) {
       try {
-        await fetch(`/delete-teacher?id=${id}`, {
+        await fetch(`${TEACHER_SERVICE_URL}/delete-teacher?id=${id}`, {
           method: "DELETE",
         });
         fetchTeachers();
@@ -134,7 +134,7 @@ function App() {
   const handleDeleteEmployee = async (id) => {
     if (window.confirm("Are you sure you want to delete this employee?")) {
       try {
-        await fetch(`/delete-employee?id=${id}`, {
+        await fetch(`${EMPLOYEE_SERVICE_URL}/delete-employee?id=${id}`, {
           method: "DELETE",
         });
         fetchEmployees();
@@ -148,7 +148,7 @@ function App() {
   // Edit handlers
   const handleEditStudent = async (updatedStudent) => {
     try {
-      await fetch(`/update-student`, {
+      await fetch(`${STUDENT_SERVICE_URL}/update-student`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedStudent),
@@ -162,7 +162,7 @@ function App() {
 
   const handleEditTeacher = async (updatedTeacher) => {
     try {
-      await fetch(`/update-teacher`, {
+      await fetch(`${TEACHER_SERVICE_URL}/update-teacher`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedTeacher),
@@ -176,7 +176,7 @@ function App() {
 
   const handleEditEmployee = async (updatedEmployee) => {
     try {
-      await fetch(`/update-employee`, {
+      await fetch(`${EMPLOYEE_SERVICE_URL}/update-employee`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedEmployee),
