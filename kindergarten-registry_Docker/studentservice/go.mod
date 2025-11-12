@@ -1,4 +1,4 @@
-module employeeservice
+module studentservice
 
 go 1.23
 

@@ -3,41 +3,36 @@ package main
 import (
 	"log"
 	"net/http"
-	"studentservice/database" 
+	"studentservice/database"
 	"studentservice/handlers"
 	
-	_ "go.elastic.co/apm/v2"
+	"go.elastic.co/apm/v2"
 )
 
-// APM configuration
+// SIMPLIFIED APM initialization
 func initAPM() {
-	// APM server configuration
-	err := apm.InitDefaultTracer(
-		apm.WithServiceName("student-service"),
-		apm.WithServiceVersion("1.0.0"),
-		apm.WithServiceEnvironment("development"),
-		apm.WithServerURL("http://192.168.56.114:8200"),
-		apm.WithSecretToken("thO5a5ISLcoTrogIcH8XljEPRLs9uqoswl"),
-	)
-	
-	if err != nil {
-		log.Printf("APM initialization failed: %v", err)
+	// APM auto-initializes from environment variables in Docker
+	if apm.DefaultTracer().Active() {
+		log.Println("APM initialized for Student Service")
 	} else {
-		log.Println("APM initialized successfully for Student Service")
+		log.Println("APM not active - using environment variables")
 	}
 }
 
-// APM middleware (same as other services)
+// SIMPLIFIED APM middleware
 func apmMiddleware(handler http.HandlerFunc, operationName string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// Start transaction
-		tx := apm.DefaultTracer().StartTransaction(operationName, "request")
+		tracer := apm.DefaultTracer()
+		if tracer == nil || !tracer.Active() {
+			handler(w, r)
+			return
+		}
+		
+		tx := tracer.StartTransaction(operationName, "request")
 		defer tx.End()
 		
 		ctx := apm.ContextWithTransaction(r.Context(), tx)
 		req := r.WithContext(ctx)
-		
-		// Add context to request
 		handler(w, req)
 	}
 }

@@ -1,4 +1,4 @@
-module employeeservice
+module teacherservice
 
 go 1.23
 
@@ -6,6 +6,7 @@ require (
     go.mongodb.org/mongo-driver v1.15.0
     go.elastic.co/apm/v2 v2.4.7
 )
+
 
 require (
 	github.com/armon/go-radix v1.0.0 // indirect

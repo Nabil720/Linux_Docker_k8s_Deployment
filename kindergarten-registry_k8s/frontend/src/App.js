@@ -8,6 +8,7 @@ import EmployeeForm from "./components/EmployeeForm";
 import EmployeeList from "./components/EmployeeList";
 import "./App.css";
 
+
 function App() {
   const [students, setStudents] = useState([]);
   const [teachers, setTeachers] = useState([]);
@@ -15,13 +16,12 @@ function App() {
   const [activeTab, setActiveTab] = useState("students");
 
   // API Base URLs for each service
-  const BASE_URL = "https://nasirtechtalks.com/";
-  // const STUDENT_SERVICE_URL = "https://nasirtechtalks.com";
-  // const TEACHER_SERVICE_URL = "https://nasirtechtalks.com";
-  // const EMPLOYEE_SERVICE_URL = "https://nasirtechtalks.com";
+  const STUDENT_SERVICE_URL = "http://nabil.com/api/student";
+  const TEACHER_SERVICE_URL = "http://nabil.com/api/teacher";
+  const EMPLOYEE_SERVICE_URL = "http://nabil.com/api/employee";
 
   const fetchStudents = () => {
-    fetch(`${BASE_URL}/student/students`)
+    fetch(`${STUDENT_SERVICE_URL}/students`)
       .then((res) => {
         if (!res.ok) {
           throw new Error(`Student service error: ${res.status}`);
@@ -64,7 +64,7 @@ function App() {
 
   const addStudent = async (student) => {
     try {
-      await fetch(`${BASE_URL}/student/add-student`, {
+      await fetch(`${STUDENT_SERVICE_URL}/add-student`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(student),
@@ -107,7 +107,7 @@ function App() {
   const handleDeleteStudent = async (roll) => {
     if (window.confirm("Are you sure you want to delete this student?")) {
       try {
-        await fetch(`${BASE_URL}/student/delete-student?roll=${roll}`, {
+        await fetch(`${STUDENT_SERVICE_URL}/delete-student?roll=${roll}`, {
           method: "DELETE",
         });
         fetchStudents();
@@ -149,7 +149,7 @@ function App() {
   // Edit handlers
   const handleEditStudent = async (updatedStudent) => {
     try {
-      await fetch(`${BASE_URL}/student/update-student`, {
+      await fetch(`${STUDENT_SERVICE_URL}/update-student`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedStudent),

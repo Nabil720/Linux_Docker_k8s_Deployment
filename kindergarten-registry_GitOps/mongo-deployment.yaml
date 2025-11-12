@@ -65,5 +65,4 @@ spec:
   ports:
     - protocol: TCP
       port: 27017
-      nodePort: 30017
-  type: NodePort
+  type: ClusterIP
