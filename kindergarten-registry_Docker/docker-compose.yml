@@ -9,6 +9,9 @@ services:
       - mongo
     environment:
       - MONGO_URI=mongodb://mongo:27017
+      - ELASTIC_APM_SERVER_URL=http://192.168.56.114:8200
+      - ELASTIC_APM_SECRET_TOKEN=thO5a5ISLcoTrogIcH8XljEPRLs9uqoswl
+      - ELASTIC_APM_SERVICE_NAME=student-service
 
   teacher-service:
     build: 
@@ -20,6 +23,9 @@ services:
       - mongo
     environment:
       - MONGO_URI=mongodb://mongo:27017
+      - ELASTIC_APM_SERVER_URL=http://192.168.56.114:8200
+      - ELASTIC_APM_SECRET_TOKEN=thO5a5ISLcoTrogIcH8XljEPRLs9uqoswl
+      - ELASTIC_APM_SERVICE_NAME=teacher-service
 
   employee-service:
     build: 
@@ -31,11 +37,16 @@ services:
       - mongo
     environment:
       - MONGO_URI=mongodb://mongo:27017
+      - ELASTIC_APM_SERVER_URL=http://192.168.56.114:8200
+      - ELASTIC_APM_SECRET_TOKEN=thO5a5ISLcoTrogIcH8XljEPRLs9uqoswl
+      - ELASTIC_APM_SERVICE_NAME=employee-service
 
   frontend:
     build: ./frontend
     ports:
       - "3000:3000"
+    environment:
+      - ELASTIC_APM_SERVER_URL=http://192.168.56.114:8200
     stdin_open: true
     tty: true
 

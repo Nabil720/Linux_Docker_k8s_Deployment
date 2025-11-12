@@ -7,6 +7,18 @@ import TeacherList from "./components/TeacherList";
 import EmployeeForm from "./components/EmployeeForm";
 import EmployeeList from "./components/EmployeeList";
 import "./App.css";
+import { init as initApm } from '@elastic/apm-rum'
+
+// APM initialization
+const apm = initApm({
+  serviceName: 'kindergarten-frontend',
+  serverUrl: 'http://192.168.56.114:8200',
+  serviceVersion: '1.0.0',
+  environment: 'development'
+})
+
+
+
 
 function App() {
   const [students, setStudents] = useState([]);

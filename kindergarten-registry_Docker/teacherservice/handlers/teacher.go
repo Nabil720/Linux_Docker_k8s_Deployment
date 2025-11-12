@@ -9,18 +9,23 @@ import (
 	"teacherservice/models"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.elastic.co/apm/v2"
 )
-
 
 func GetTeachers(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
+	// Start APM span for database operation
+	span, ctx := apm.StartSpan(r.Context(), "GetTeachersFromDB", "db.mongodb.query")
+	defer span.End()
+
 	collection := database.GetCollection("teachers")
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
 	cursor, err := collection.Find(ctx, bson.M{})
 	if err != nil {
+		apm.CaptureError(r.Context(), err).Send()
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -28,6 +33,7 @@ func GetTeachers(w http.ResponseWriter, r *http.Request) {
 
 	var teachers []models.Teacher
 	if err = cursor.All(ctx, &teachers); err != nil {
+		apm.CaptureError(r.Context(), err).Send()
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -40,23 +46,31 @@ func AddTeacher(w http.ResponseWriter, r *http.Request) {
 	
 	var teacher models.Teacher
 	if err := json.NewDecoder(r.Body).Decode(&teacher); err != nil {
+		apm.CaptureError(r.Context(), err).Send()
 		http.Error(w, "Invalid input", http.StatusBadRequest)
 		return
 	}
 
+	// Start APM span for database operation
+	span, ctx := apm.StartSpan(r.Context(), "AddTeacherToDB", "db.mongodb.query")
+	defer span.End()
+
 	collection := database.GetCollection("teachers")
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
 	// Check if teacher already exists
 	existing := collection.FindOne(ctx, bson.M{"id": teacher.ID})
 	if existing.Err() == nil {
+		err := existing.Err()
+		apm.CaptureError(r.Context(), err).Send()
 		http.Error(w, "Teacher with this ID already exists", http.StatusConflict)
 		return
 	}
 
 	_, err := collection.InsertOne(ctx, teacher)
 	if err != nil {
+		apm.CaptureError(r.Context(), err).Send()
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -74,12 +88,17 @@ func DeleteTeacher(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Start APM span for database operation
+	span, ctx := apm.StartSpan(r.Context(), "DeleteTeacherFromDB", "db.mongodb.query")
+	defer span.End()
+
 	collection := database.GetCollection("teachers")
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
 	result, err := collection.DeleteOne(ctx, bson.M{"id": id})
 	if err != nil {
+		apm.CaptureError(r.Context(), err).Send()
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -98,12 +117,17 @@ func UpdateTeacher(w http.ResponseWriter, r *http.Request) {
 	
 	var updated models.Teacher
 	if err := json.NewDecoder(r.Body).Decode(&updated); err != nil {
+		apm.CaptureError(r.Context(), err).Send()
 		http.Error(w, "Invalid input", http.StatusBadRequest)
 		return
 	}
 
+	// Start APM span for database operation
+	span, ctx := apm.StartSpan(r.Context(), "UpdateTeacherInDB", "db.mongodb.query")
+	defer span.End()
+
 	collection := database.GetCollection("teachers")
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
 	result, err := collection.UpdateOne(
@@ -112,6 +136,7 @@ func UpdateTeacher(w http.ResponseWriter, r *http.Request) {
 		bson.M{"$set": updated},
 	)
 	if err != nil {
+		apm.CaptureError(r.Context(), err).Send()
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
