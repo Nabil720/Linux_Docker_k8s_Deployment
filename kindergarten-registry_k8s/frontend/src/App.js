@@ -63,7 +63,7 @@ function App() {
 
   const addStudent = async (student) => {
     try {
-      await fetch(`${STUDENT_SERVICE_URL}/students/add-student`, {
+      await fetch(`${STUDENT_SERVICE_URL}/student-service/add-student`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(student),
