@@ -63,7 +63,7 @@ function App() {
 
   const addStudent = async (student) => {
     try {
-      await fetch(`${STUDENT_SERVICE_URL}/add-student`, {
+      await fetch(`${STUDENT_SERVICE_URL}/students/add-student`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(student),
@@ -106,7 +106,7 @@ function App() {
   const handleDeleteStudent = async (roll) => {
     if (window.confirm("Are you sure you want to delete this student?")) {
       try {
-        await fetch(`${STUDENT_SERVICE_URL}/delete-student?roll=${roll}`, {
+        await fetch(`${STUDENT_SERVICE_URL}/students/delete-student?roll=${roll}`, {
           method: "DELETE",
         });
         fetchStudents();
@@ -148,7 +148,7 @@ function App() {
   // Edit handlers
   const handleEditStudent = async (updatedStudent) => {
     try {
-      await fetch(`${STUDENT_SERVICE_URL}/update-student`, {
+      await fetch(`${STUDENT_SERVICE_URL}/students/update-student`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedStudent),
