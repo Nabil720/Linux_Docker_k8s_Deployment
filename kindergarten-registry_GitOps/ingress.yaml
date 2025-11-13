@@ -1,0 +1,42 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kindergarten-ingress
+  namespace: default
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/use-regex: "true"
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: nabil.com
+    http:
+      paths:
+      - path: /(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend
+            port:
+              number: 80
+      - path: /api/student/(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: student-service
+            port:
+              number: 5001
+      - path: /api/teacher/(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: teacher-service
+            port:
+              number: 5002
+      - path: /api/employee/(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: employee-service
+            port:
+              number: 5003
