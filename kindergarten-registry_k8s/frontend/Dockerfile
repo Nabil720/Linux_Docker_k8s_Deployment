@@ -1,23 +1,29 @@
-# Use the official Node.js image as a base
-FROM node:16
+# Build stage
+FROM node:16 as build
 
-# Set the working directory in the container
 WORKDIR /app
 
-# Copy the package.json and package-lock.json to the container
 COPY package*.json ./
-
-# Install the app dependencies (including react-scripts)
 RUN npm install
 
-# Verify installation
-RUN npm list react-scripts
-
-# Copy the rest of the app's files into the container
 COPY . .
+RUN npm run build
 
-# Expose port 3000 for the frontend
+# Production stage - Node.js দিয়ে serve করুন
+FROM node:16-alpine
+
+WORKDIR /app
+
+# শুধু production dependencies install করুন
+COPY package*.json ./
+RUN npm install --only=production
+
+# Build files copy করুন
+COPY --from=build /app/build ./build
+
+# Simple Node.js server file copy করুন
+COPY server.js ./server.js
+
 EXPOSE 3000
 
-# Start the app
-CMD ["npm", "start"]
+CMD ["node", "server.js"]

@@ -4,7 +4,7 @@ metadata:
   name: kindergarten-ingress
   namespace: default
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
     nginx.ingress.kubernetes.io/use-regex: "true"
 spec:
   ingressClassName: nginx
@@ -12,29 +12,29 @@ spec:
   - host: nabil.com
     http:
       paths:
-      - path: /(.*)
+      - path: /
         pathType: Prefix
         backend:
           service:
             name: frontend
             port:
               number: 80
-      - path: /api/student/(.*)
-        pathType: Prefix
+      - path: /api/student(/|$)(.*)
+        pathType: ImplementationSpecific
         backend:
           service:
             name: student-service
             port:
               number: 5001
-      - path: /api/teacher/(.*)
-        pathType: Prefix
+      - path: /api/teacher(/|$)(.*)
+        pathType: ImplementationSpecific
         backend:
           service:
             name: teacher-service
             port:
               number: 5002
-      - path: /api/employee/(.*)
-        pathType: Prefix
+      - path: /api/employee(/|$)(.*)
+        pathType: ImplementationSpecific
         backend:
           service:
             name: employee-service
