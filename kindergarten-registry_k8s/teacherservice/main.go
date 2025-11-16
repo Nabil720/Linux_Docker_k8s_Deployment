@@ -20,7 +20,7 @@ func main() {
 	}
 
 	// Teacher Routes
-	http.HandleFunc("/tech/add-teacher", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/tech/add-teacher", func(w http.ResponseWriter, r *http.Request) {   // Here using this  "/tech/add-teacher" path , we POST in  the Add-teacher service 
 		enableCors(w)
 		if r.Method == http.MethodOptions {
 			return
@@ -28,7 +28,8 @@ func main() {
 		handlers.AddTeacher(w, r)
 	})
 
-	http.HandleFunc("/tech/teachers", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/tech/teachers", func(w http.ResponseWriter, r *http.Request) {      // Here using this  "/tech/teachers" path , we GET teachers  
+		enableCors(w)
 		enableCors(w)
 		if r.Method == http.MethodOptions {
 			return
@@ -36,7 +37,8 @@ func main() {
 		handlers.GetTeachers(w, r)
 	})
 
-	http.HandleFunc("/tech/delete-teacher", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/tech/delete-teacher", func(w http.ResponseWriter, r *http.Request) {    // Here using this  "/tech/delete-teacher" path , we DELETE in  the Teachers   service 
+		enableCors(w)
 		enableCors(w)
 		if r.Method == http.MethodOptions {
 			return
@@ -48,7 +50,7 @@ func main() {
 		handlers.DeleteTeacher(w, r)
 	})
 
-	http.HandleFunc("/tech/update-teacher", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/tech/update-teacher", func(w http.ResponseWriter, r *http.Request) {   // Here using this  "/tech/update-teacher" path , we PUT in  the Teachers service 
 		enableCors(w)
 		if r.Method == http.MethodOptions {
 			return

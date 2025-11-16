@@ -3,8 +3,14 @@ kind: Ingress
 metadata:
   name: kindergarten-ingress
   namespace: default
+  annotations:
+    # ALB-specific annotations
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-south-1:287303197111:certificate/131b8c78-c250-436e-8de0-e50c22f41245
 spec:
-  ingressClassName: nginx
+  ingressClassName: alb
   rules:
   - host: nasirtechtalks.com
     http:

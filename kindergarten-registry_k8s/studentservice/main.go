@@ -20,7 +20,7 @@ func main() {
 	}
 
 	// Student Routes
-	http.HandleFunc("/std/add-student", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/std/add-student", func(w http.ResponseWriter, r *http.Request) {   // Here using this  "/std/add-student" path , we POST in  the Add-student service 
 		enableCors(w)
 		if r.Method == http.MethodOptions {
 			return
@@ -28,7 +28,8 @@ func main() {
 		handlers.AddStudent(w, r)
 	})
 
-	http.HandleFunc("/std/students", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/std/students", func(w http.ResponseWriter, r *http.Request) {         // Here using this  "/std/students" path , we GET students  
+		enableCors(w)
 		enableCors(w)
 		if r.Method == http.MethodOptions {
 			return
@@ -36,7 +37,8 @@ func main() {
 		handlers.GetStudents(w, r)
 	})
 
-	http.HandleFunc("/std/delete-student", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/std/delete-student", func(w http.ResponseWriter, r *http.Request) {    // Here using this  "/std/delete-student" path , we DELETE in  the Students  service 
+		enableCors(w)
 		enableCors(w)
 		if r.Method == http.MethodOptions {
 			return
@@ -48,7 +50,7 @@ func main() {
 		handlers.DeleteStudent(w, r)
 	})
 
-	http.HandleFunc("/std/update-student", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/std/update-student", func(w http.ResponseWriter, r *http.Request) {  // Here using this  "/std/update-student" path , we PUT in  the Students service 
 		enableCors(w)
 		if r.Method == http.MethodOptions {
 			return
