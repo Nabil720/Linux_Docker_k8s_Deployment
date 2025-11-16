@@ -9,7 +9,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: nabil.com
+  - host: nasirtechtalks.com
     http:
       paths:
       - path: /

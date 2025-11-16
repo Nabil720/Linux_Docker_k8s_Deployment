@@ -16,9 +16,9 @@ function App() {
   const [activeTab, setActiveTab] = useState("students");
 
   // API Base URLs for each service
-const STUDENT_SERVICE_URL = "http://nabil.com:32317/api/student";
-const TEACHER_SERVICE_URL = "http://nabil.com:32317/api/teacher";
-const EMPLOYEE_SERVICE_URL = "http://nabil.com:32317/api/employee";
+const STUDENT_SERVICE_URL = "https://nasirtechtalks.com/api/student";
+const TEACHER_SERVICE_URL = "https://nasirtechtalks.com/api/teacher";
+const EMPLOYEE_SERVICE_URL = "https://nasirtechtalks.com/api/employee";
   const fetchStudents = () => {
     fetch(`${STUDENT_SERVICE_URL}/students`)
       .then((res) => {
