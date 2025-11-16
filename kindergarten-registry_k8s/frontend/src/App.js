@@ -15,9 +15,9 @@ function App() {
   const [activeTab, setActiveTab] = useState("students");
 
   // API Base URLs for each service - ADD trailing slashes
-  const STUDENT_SERVICE_URL = "https://nasirtechtalks.com/api/student/";
-  const TEACHER_SERVICE_URL = "https://nasirtechtalks.com/api/teacher/";
-  const EMPLOYEE_SERVICE_URL = "https://nasirtechtalks.com/api/employee/";
+  const STUDENT_SERVICE_URL = "https://nasirtechtalks.com";
+  const TEACHER_SERVICE_URL = "https://nasirtechtalks.com";
+  const EMPLOYEE_SERVICE_URL = "https://nasirtechtalks.com";
 
   const fetchStudents = () => {
     fetch(`${STUDENT_SERVICE_URL}students`)

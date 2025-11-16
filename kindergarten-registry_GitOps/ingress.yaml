@@ -4,7 +4,6 @@ metadata:
   name: kindergarten-ingress
   namespace: default
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /$2
     nginx.ingress.kubernetes.io/use-regex: "true"
 spec:
   ingressClassName: nginx
@@ -19,24 +18,24 @@ spec:
             name: frontend
             port:
               number: 80
-      - path: /api/student(/|$)(.*)
+      - path: /std(/|$)(.*)
         pathType: ImplementationSpecific
         backend:
           service:
             name: student-service
             port:
               number: 5001
-      - path: /api/teacher(/|$)(.*)
-        pathType: ImplementationSpecific
-        backend:
-          service:
-            name: teacher-service
-            port:
-              number: 5002
-      - path: /api/employee(/|$)(.*)
+      - path: /emp(/|$)(.*)
         pathType: ImplementationSpecific
         backend:
           service:
             name: employee-service
             port:
               number: 5003
+      - path: /tech(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: teacher-service
+            port:
+              number: 5002

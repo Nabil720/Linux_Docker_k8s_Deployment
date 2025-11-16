@@ -20,7 +20,7 @@ func main() {
 	}
 
 	// Teacher Routes
-	http.HandleFunc("/add-teacher", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/tech/add-teacher", func(w http.ResponseWriter, r *http.Request) {
 		enableCors(w)
 		if r.Method == http.MethodOptions {
 			return
@@ -28,7 +28,7 @@ func main() {
 		handlers.AddTeacher(w, r)
 	})
 
-	http.HandleFunc("/teachers", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/tech/teachers", func(w http.ResponseWriter, r *http.Request) {
 		enableCors(w)
 		if r.Method == http.MethodOptions {
 			return
@@ -36,7 +36,7 @@ func main() {
 		handlers.GetTeachers(w, r)
 	})
 
-	http.HandleFunc("/delete-teacher", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/tech/delete-teacher", func(w http.ResponseWriter, r *http.Request) {
 		enableCors(w)
 		if r.Method == http.MethodOptions {
 			return
@@ -48,7 +48,7 @@ func main() {
 		handlers.DeleteTeacher(w, r)
 	})
 
-	http.HandleFunc("/update-teacher", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/tech/update-teacher", func(w http.ResponseWriter, r *http.Request) {
 		enableCors(w)
 		if r.Method == http.MethodOptions {
 			return

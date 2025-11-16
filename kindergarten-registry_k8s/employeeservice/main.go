@@ -20,7 +20,7 @@ func main() {
 	}
 
 	// Employee Routes
-	http.HandleFunc("/add-employee", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/emp/add-employee", func(w http.ResponseWriter, r *http.Request) {
 		enableCors(w)
 		if r.Method == http.MethodOptions {
 			return
@@ -28,7 +28,7 @@ func main() {
 		handlers.AddEmployee(w, r)
 	})
 
-	http.HandleFunc("/employees", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/emp/employees", func(w http.ResponseWriter, r *http.Request) {
 		enableCors(w)
 		if r.Method == http.MethodOptions {
 			return
@@ -36,7 +36,7 @@ func main() {
 		handlers.GetEmployees(w, r)
 	})
 
-	http.HandleFunc("/delete-employee", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/emp/delete-employee", func(w http.ResponseWriter, r *http.Request) {
 		enableCors(w)
 		if r.Method == http.MethodOptions {
 			return
@@ -48,7 +48,7 @@ func main() {
 		handlers.DeleteEmployee(w, r)
 	})
 
-	http.HandleFunc("/update-employee", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/emp/update-employee", func(w http.ResponseWriter, r *http.Request) {
 		enableCors(w)
 		if r.Method == http.MethodOptions {
 			return
