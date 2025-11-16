@@ -8,19 +8,19 @@ import EmployeeForm from "./components/EmployeeForm";
 import EmployeeList from "./components/EmployeeList";
 import "./App.css";
 
-
 function App() {
   const [students, setStudents] = useState([]);
   const [teachers, setTeachers] = useState([]);
   const [employees, setEmployees] = useState([]);
   const [activeTab, setActiveTab] = useState("students");
 
-  // API Base URLs for each service
-const STUDENT_SERVICE_URL = "https://nasirtechtalks.com/api/student";
-const TEACHER_SERVICE_URL = "https://nasirtechtalks.com/api/teacher";
-const EMPLOYEE_SERVICE_URL = "https://nasirtechtalks.com/api/employee";
+  // API Base URLs for each service - ADD trailing slashes
+  const STUDENT_SERVICE_URL = "https://nasirtechtalks.com/api/student/";
+  const TEACHER_SERVICE_URL = "https://nasirtechtalks.com/api/teacher/";
+  const EMPLOYEE_SERVICE_URL = "https://nasirtechtalks.com/api/employee/";
+
   const fetchStudents = () => {
-    fetch(`${STUDENT_SERVICE_URL}/students`)
+    fetch(`${STUDENT_SERVICE_URL}students`)
       .then((res) => {
         if (!res.ok) {
           throw new Error(`Student service error: ${res.status}`);
@@ -32,7 +32,7 @@ const EMPLOYEE_SERVICE_URL = "https://nasirtechtalks.com/api/employee";
   };
 
   const fetchTeachers = () => {
-    fetch(`${TEACHER_SERVICE_URL}/teachers`)
+    fetch(`${TEACHER_SERVICE_URL}teachers`)
       .then((res) => {
         if (!res.ok) {
           throw new Error(`Teacher service error: ${res.status}`);
@@ -44,7 +44,7 @@ const EMPLOYEE_SERVICE_URL = "https://nasirtechtalks.com/api/employee";
   };
 
   const fetchEmployees = () => {
-    fetch(`${EMPLOYEE_SERVICE_URL}/employees`)
+    fetch(`${EMPLOYEE_SERVICE_URL}employees`)
       .then((res) => {
         if (!res.ok) {
           throw new Error(`Employee service error: ${res.status}`);
@@ -63,7 +63,7 @@ const EMPLOYEE_SERVICE_URL = "https://nasirtechtalks.com/api/employee";
 
   const addStudent = async (student) => {
     try {
-      await fetch(`${STUDENT_SERVICE_URL}/add-student`, {
+      await fetch(`${STUDENT_SERVICE_URL}add-student`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(student),
@@ -77,7 +77,7 @@ const EMPLOYEE_SERVICE_URL = "https://nasirtechtalks.com/api/employee";
 
   const addTeacher = async (teacher) => {
     try {
-      await fetch(`${TEACHER_SERVICE_URL}/add-teacher`, {
+      await fetch(`${TEACHER_SERVICE_URL}add-teacher`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(teacher),
@@ -91,7 +91,7 @@ const EMPLOYEE_SERVICE_URL = "https://nasirtechtalks.com/api/employee";
 
   const addEmployee = async (employee) => {
     try {
-      await fetch(`${EMPLOYEE_SERVICE_URL}/add-employee`, {
+      await fetch(`${EMPLOYEE_SERVICE_URL}add-employee`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(employee),
@@ -106,7 +106,7 @@ const EMPLOYEE_SERVICE_URL = "https://nasirtechtalks.com/api/employee";
   const handleDeleteStudent = async (roll) => {
     if (window.confirm("Are you sure you want to delete this student?")) {
       try {
-        await fetch(`${STUDENT_SERVICE_URL}/delete-student?roll=${roll}`, {
+        await fetch(`${STUDENT_SERVICE_URL}delete-student?roll=${roll}`, {
           method: "DELETE",
         });
         fetchStudents();
@@ -120,7 +120,7 @@ const EMPLOYEE_SERVICE_URL = "https://nasirtechtalks.com/api/employee";
   const handleDeleteTeacher = async (id) => {
     if (window.confirm("Are you sure you want to delete this teacher?")) {
       try {
-        await fetch(`${TEACHER_SERVICE_URL}/delete-teacher?id=${id}`, {
+        await fetch(`${TEACHER_SERVICE_URL}delete-teacher?id=${id}`, {
           method: "DELETE",
         });
         fetchTeachers();
@@ -134,7 +134,7 @@ const EMPLOYEE_SERVICE_URL = "https://nasirtechtalks.com/api/employee";
   const handleDeleteEmployee = async (id) => {
     if (window.confirm("Are you sure you want to delete this employee?")) {
       try {
-        await fetch(`${EMPLOYEE_SERVICE_URL}/delete-employee?id=${id}`, {
+        await fetch(`${EMPLOYEE_SERVICE_URL}delete-employee?id=${id}`, {
           method: "DELETE",
         });
         fetchEmployees();
@@ -148,7 +148,7 @@ const EMPLOYEE_SERVICE_URL = "https://nasirtechtalks.com/api/employee";
   // Edit handlers
   const handleEditStudent = async (updatedStudent) => {
     try {
-      await fetch(`${STUDENT_SERVICE_URL}/update-student`, {
+      await fetch(`${STUDENT_SERVICE_URL}update-student`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedStudent),
@@ -162,7 +162,7 @@ const EMPLOYEE_SERVICE_URL = "https://nasirtechtalks.com/api/employee";
 
   const handleEditTeacher = async (updatedTeacher) => {
     try {
-      await fetch(`${TEACHER_SERVICE_URL}/update-teacher`, {
+      await fetch(`${TEACHER_SERVICE_URL}update-teacher`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedTeacher),
@@ -176,7 +176,7 @@ const EMPLOYEE_SERVICE_URL = "https://nasirtechtalks.com/api/employee";
 
   const handleEditEmployee = async (updatedEmployee) => {
     try {
-      await fetch(`${EMPLOYEE_SERVICE_URL}/update-employee`, {
+      await fetch(`${EMPLOYEE_SERVICE_URL}update-employee`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedEmployee),
