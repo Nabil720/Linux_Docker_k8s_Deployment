@@ -1,23 +1,27 @@
-# Use the official Node.js image as a base
-FROM node:16
+# Stage 1: Dependencies stage
+FROM node:16 AS deps
 
-# Set the working directory in the container
 WORKDIR /app
-
-# Copy the package.json and package-lock.json to the container
 COPY package*.json ./
+RUN npm ci
 
-# Install the app dependencies (including react-scripts)
-RUN npm install
+# Stage 2: Build stage 
+FROM node:16 AS builder
 
-# Verify installation
-RUN npm list react-scripts
-
-# Copy the rest of the app's files into the container
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+RUN npm run build
 
-# Expose port 3000 for the frontend
+# Stage 3: Production stage
+FROM node:16 AS production
+
+WORKDIR /app
+COPY --from=deps /app/package*.json ./
+RUN npm ci --only=production
+
+COPY --from=builder /app/build ./build
+COPY --from=builder /app/public ./public
+
 EXPOSE 3000
-
-# Start the app
 CMD ["npm", "start"]
