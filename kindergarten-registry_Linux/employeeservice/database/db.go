@@ -13,16 +13,21 @@ var Client *mongo.Client
 var Database *mongo.Database
 
 func Connect() error {
+	// From Environment variables 
+	connectionString := os.Getenv("MONGODB_URI")
+	// if connectionString == "" {
+	// 	connectionString = "mongodb://mongo:27017" // default value
+	// }
+
+	databaseName := os.Getenv("DATABASE_NAME")
+	if databaseName == "" {
+		databaseName = "kindergarten" // default value
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:27017"))
-	if err != nil {
-		return err
-	}
-
-	// Check connection
-	err = client.Ping(ctx, nil)
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(connectionString))
 	if err != nil {
 		return err
 	}

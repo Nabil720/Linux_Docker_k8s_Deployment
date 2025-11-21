@@ -19,7 +19,10 @@ spec:
         - containerPort: 5001
         env:
           - name: MONGO_URI
-            value: "mongodb://mongo:27017"
+            valueFrom:
+              secretKeyRef:
+                name: mongo-secret
+                key: mongo-uri
 ---
 apiVersion: v1
 kind: Service
