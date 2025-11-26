@@ -5,7 +5,38 @@ import (
 	"net/http"
 	"studentservice/database" 
 	"studentservice/handlers"
+
+	"go.elastic.co/apm/v2"
 )
+
+// SIMPLIFIED APM initialization
+func initAPM() {
+	// APM auto-initializes from environment variables in Docker
+	if apm.DefaultTracer().Active() {
+		log.Println("APM initialized for Student Service")
+	} else {
+		log.Println("APM not active - using environment variables")
+	}
+}
+
+// SIMPLIFIED APM middleware
+func apmMiddleware(handler http.HandlerFunc, operationName string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		tracer := apm.DefaultTracer()
+		if tracer == nil || !tracer.Active() {
+			handler(w, r)
+			return
+		}
+		
+		tx := tracer.StartTransaction(operationName, "request")
+		defer tx.End()
+		
+		ctx := apm.ContextWithTransaction(r.Context(), tx)
+		req := r.WithContext(ctx)
+		handler(w, req)
+	}
+}
+
 
 func enableCors(w http.ResponseWriter) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -14,6 +45,9 @@ func enableCors(w http.ResponseWriter) {
 }
 
 func main() {
+	// Initialize APM
+	initAPM()
+
 	// Database connection
 	if err := database.Connect(); err != nil {
 		log.Fatal("Database connection failed:", err)
@@ -25,7 +59,7 @@ func main() {
 		if r.Method == http.MethodOptions {
 			return
 		}
-		handlers.AddStudent(w, r)
+		apmMiddleware(handlers.AddStudent, "POST /add-student")(w, r)
 	})
 
 	http.HandleFunc("/std/students", func(w http.ResponseWriter, r *http.Request) {         // Here using this  "/std/students" path , we GET students  
@@ -34,7 +68,7 @@ func main() {
 		if r.Method == http.MethodOptions {
 			return
 		}
-		handlers.GetStudents(w, r)
+		apmMiddleware(handlers.GetStudents, "GET /students")(w, r)
 	})
 
 	http.HandleFunc("/std/delete-student", func(w http.ResponseWriter, r *http.Request) {    // Here using this  "/std/delete-student" path , we DELETE in  the Students  service 
@@ -47,7 +81,7 @@ func main() {
 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 			return
 		}
-		handlers.DeleteStudent(w, r)
+		apmMiddleware(handlers.DeleteStudent, "DELETE /delete-student")(w, r)
 	})
 
 	http.HandleFunc("/std/update-student", func(w http.ResponseWriter, r *http.Request) {  // Here using this  "/std/update-student" path , we PUT in  the Students service 
@@ -59,7 +93,7 @@ func main() {
 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 			return
 		}
-		handlers.UpdateStudent(w, r)
+		apmMiddleware(handlers.UpdateStudent, "PUT /update-student")(w, r)
 	})
 
 	log.Println("Student Service running on port 5001")

@@ -5,7 +5,36 @@ import (
 	"net/http"
 	"teacherservice/database" 
 	"teacherservice/handlers"
+
+	"go.elastic.co/apm/v2"
 )
+
+func initAPM() {
+	if apm.DefaultTracer().Active() {
+		log.Println("APM initialized for Teacher Service")
+	} else {
+		log.Println("APM not active - using environment variables")
+	}
+}
+
+func apmMiddleware(handler http.HandlerFunc, operationName string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		tracer := apm.DefaultTracer()
+		if tracer == nil || !tracer.Active() {
+			handler(w, r)
+			return
+		}
+		
+		tx := tracer.StartTransaction(operationName, "request")
+		defer tx.End()
+		
+		ctx := apm.ContextWithTransaction(r.Context(), tx)
+		req := r.WithContext(ctx)
+		handler(w, req)
+	}
+}
+
+
 
 func enableCors(w http.ResponseWriter) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -14,6 +43,7 @@ func enableCors(w http.ResponseWriter) {
 }
 
 func main() {
+	initAPM()
 	// Database connection
 	if err := database.Connect(); err != nil {
 		log.Fatal("Database connection failed:", err)
@@ -25,7 +55,7 @@ func main() {
 		if r.Method == http.MethodOptions {
 			return
 		}
-		handlers.AddTeacher(w, r)
+		apmMiddleware(handlers.AddTeacher, "POST /add-teacher")(w, r)
 	})
 
 	http.HandleFunc("/tech/teachers", func(w http.ResponseWriter, r *http.Request) {      // Here using this  "/tech/teachers" path , we GET teachers  
@@ -34,7 +64,7 @@ func main() {
 		if r.Method == http.MethodOptions {
 			return
 		}
-		handlers.GetTeachers(w, r)
+		apmMiddleware(handlers.GetTeachers, "GET /teachers")(w, r)
 	})
 
 	http.HandleFunc("/tech/delete-teacher", func(w http.ResponseWriter, r *http.Request) {    // Here using this  "/tech/delete-teacher" path , we DELETE in  the Teachers   service 
@@ -47,10 +77,10 @@ func main() {
 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 			return
 		}
-		handlers.DeleteTeacher(w, r)
+		apmMiddleware(handlers.DeleteTeacher, "DELETE /delete-teacher")(w, r)
 	})
 
-	http.HandleFunc("/tech/update-teacher", func(w http.ResponseWriter, r *http.Request) {   // Here using this  "/tech/update-teacher" path , we PUT in  the Teachers service 
+	http.HandleFunc("tech/update-teacher", func(w http.ResponseWriter, r *http.Request) {   // Here using this  "/tech/update-teacher" path , we PUT in  the Teachers service 
 		enableCors(w)
 		if r.Method == http.MethodOptions {
 			return
@@ -59,7 +89,7 @@ func main() {
 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 			return
 		}
-		handlers.UpdateTeacher(w, r)
+		apmMiddleware(handlers.UpdateTeacher, "PUT /update-teacher")(w, r)
 	})
 
 	log.Println("Teacher Service running on port 5002")

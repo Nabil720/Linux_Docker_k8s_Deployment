@@ -1,29 +1,30 @@
-# Build stage
-FROM node:16 as build
+# Stage 1: Dependencies stage
+FROM node:16 AS deps
 
 WORKDIR /app
-
 COPY package*.json ./
-RUN npm install
+RUN npm ci
 
+# Stage 2: Build stage 
+FROM node:16 AS builder
+
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run build
 
-# Production stage - Node.js 
-FROM node:16-alpine
+# Stage 3: Production stage
+FROM node:16 AS production
 
 WORKDIR /app
+COPY --from=deps /app/package*.json ./
+RUN npm ci --only=production
 
-# শুধু production dependencies install 
-COPY package*.json ./
-RUN npm install --only=production
+COPY --from=builder /app/build ./build
+COPY --from=builder /app/public ./public
 
-# Build files copy 
-COPY --from=build /app/build ./build
-
-# Simple Node.js server file copy 
-COPY server.js ./server.js
+# For development, use the source code
+COPY . .
 
 EXPOSE 3000
-
-CMD ["node", "server.js"]
+CMD ["npm", "start"]

@@ -124,7 +124,9 @@ services:
     volumes:
       - mongo_data:/data/db
     environment:
-      - MONGO_INITDB_DATABASE=kindergarten
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_DATABASE}
 
 volumes:
   mongo_data:

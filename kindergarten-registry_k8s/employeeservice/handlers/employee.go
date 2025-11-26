@@ -9,10 +9,15 @@ import (
 	"employeeservice/models"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.elastic.co/apm/v2"
 )
 
 func GetEmployees(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+
+	// Start APM span for database operation
+	span, ctx := apm.StartSpan(r.Context(), "GetEmployeesFromDB", "db.mongodb.query")
+	defer span.End()
 
 	collection := database.GetCollection("employees")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -42,6 +47,10 @@ func AddEmployee(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid input", http.StatusBadRequest)
 		return
 	}
+
+	// Start APM span for database operation
+	span, ctx := apm.StartSpan(r.Context(), "AddEmployeeToDB", "db.mongodb.query")
+	defer span.End()
 
 	collection := database.GetCollection("employees")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -73,6 +82,13 @@ func DeleteEmployee(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+
+	// Start APM span for database operation
+	span, ctx := apm.StartSpan(r.Context(), "DeleteEmployeeFromDB", "db.mongodb.query")
+	defer span.End()
+
+
+
 	collection := database.GetCollection("employees")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -100,6 +116,10 @@ func UpdateEmployee(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid input", http.StatusBadRequest)
 		return
 	}
+
+	// Start APM span for database operation
+	span, ctx := apm.StartSpan(r.Context(), "UpdateEmployeeInDB", "db.mongodb.query")
+	defer span.End()
 
 	collection := database.GetCollection("employees")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)

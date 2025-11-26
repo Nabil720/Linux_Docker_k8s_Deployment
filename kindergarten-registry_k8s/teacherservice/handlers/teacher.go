@@ -9,11 +9,16 @@ import (
 	"teacherservice/models"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.elastic.co/apm/v2"
 )
 
 
 func GetTeachers(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+
+	// Start APM span for database operation
+	span, ctx := apm.StartSpan(r.Context(), "GetTeachersFromDB", "db.mongodb.query")
+	defer span.End()
 
 	collection := database.GetCollection("teachers")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -43,6 +48,10 @@ func AddTeacher(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid input", http.StatusBadRequest)
 		return
 	}
+
+	// Start APM span for database operation
+	span, ctx := apm.StartSpan(r.Context(), "AddTeacherToDB", "db.mongodb.query")
+	defer span.End()
 
 	collection := database.GetCollection("teachers")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -74,6 +83,10 @@ func DeleteTeacher(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Start APM span for database operation
+	span, ctx := apm.StartSpan(r.Context(), "DeleteTeacherFromDB", "db.mongodb.query")
+	defer span.End()
+
 	collection := database.GetCollection("teachers")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -101,6 +114,10 @@ func UpdateTeacher(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid input", http.StatusBadRequest)
 		return
 	}
+
+	// Start APM span for database operation
+	span, ctx := apm.StartSpan(r.Context(), "UpdateTeacherInDB", "db.mongodb.query")
+	defer span.End()
 
 	collection := database.GetCollection("teachers")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)

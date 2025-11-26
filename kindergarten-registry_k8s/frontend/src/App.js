@@ -7,6 +7,18 @@ import TeacherList from "./components/TeacherList";
 import EmployeeForm from "./components/EmployeeForm";
 import EmployeeList from "./components/EmployeeList";
 import "./App.css";
+import { init as initApm } from '@elastic/apm-rum'
+
+// APM initialization
+const apm = initApm({
+  serviceName: 'kindergarten-frontend',
+  serverUrl: 'http://192.168.121.224:8200',
+  serviceVersion: '1.0.0',
+  environment: 'development'
+})
+
+
+
 
 function App() {
   const [students, setStudents] = useState([]);
@@ -14,10 +26,14 @@ function App() {
   const [employees, setEmployees] = useState([]);
   const [activeTab, setActiveTab] = useState("students");
 
-  // API Base URLs for each service - ADD trailing slashes
-  const STUDENT_SERVICE_URL = "https://nasirtechtalks.com/std"; //Here "/std" is define  ingress path to setect student-services
-  const TEACHER_SERVICE_URL = "https://nasirtechtalks.com/tech"; //Here "/tech" is define  ingress path to setect teacher-services
-  const EMPLOYEE_SERVICE_URL = "https://nasirtechtalks.com/emp";  //Here "/emp" is define  ingress path to setect employee-services
+  const STUDENT_SERVICE_URL = "http://localhost:5001/std";
+  const TEACHER_SERVICE_URL = "http://localhost:5002/tech";
+  const EMPLOYEE_SERVICE_URL = "http://localhost:5003/emp";
+
+  // // API Base URLs for each service - ADD trailing slashes
+  // const STUDENT_SERVICE_URL = "https://nasirtechtalks.com/std"; //Here "/std" is define  ingress path to setect student-services
+  // const TEACHER_SERVICE_URL = "https://nasirtechtalks.com/tech"; //Here "/tech" is define  ingress path to setect teacher-services
+  // const EMPLOYEE_SERVICE_URL = "https://nasirtechtalks.com/emp";  //Here "/emp" is define  ingress path to setect employee-services
 
   const fetchStudents = () => {
     fetch(`${STUDENT_SERVICE_URL}/students`)
