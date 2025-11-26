@@ -18,11 +18,31 @@ spec:
         ports:
         - containerPort: 5002
         env:
-          - name: MONGO_URI
-            valueFrom:
-              secretKeyRef:
-                name: mongo-secret
-                key: mongo-uri
+        - name: MONGODB_URI
+          valueFrom:
+            secretKeyRef:
+              name: mongo-secret
+              key: mongodb-uri
+        - name: DATABASE_NAME
+          valueFrom:
+            secretKeyRef:
+              name: mongo-secret
+              key: database-name
+        - name: ELASTIC_APM_SERVER_URL
+          valueFrom:
+            secretKeyRef:
+              name: mongo-secret
+              key: elastic-apm-server-url
+        - name: ELASTIC_APM_SECRET_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: mongo-secret
+              key: elastic-apm-secret-token
+        - name: ELASTIC_APM_SERVICE_NAME
+          valueFrom:
+            secretKeyRef:
+              name: mongo-secret
+              key: elastic-apm-service-name-teacher
 ---
 apiVersion: v1
 kind: Service

@@ -17,6 +17,12 @@ spec:
         image: nanil0034/kindergarten-registry-frontend:40
         ports:
         - containerPort: 3000
+        env:
+        - name: ELASTIC_APM_SERVER_URL
+          valueFrom:
+            secretKeyRef:
+              name: mongo-secret
+              key: elastic-apm-server-url
 ---
 apiVersion: v1
 kind: Service
