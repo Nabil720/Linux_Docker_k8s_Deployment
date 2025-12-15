@@ -26,9 +26,9 @@ function App() {
   const [employees, setEmployees] = useState([]);
   const [activeTab, setActiveTab] = useState("students");
 
-  const STUDENT_SERVICE_URL = "http://localhost:5001/std";
-  const TEACHER_SERVICE_URL = "http://localhost:5002/tech";
-  const EMPLOYEE_SERVICE_URL = "http://localhost:5003/emp";
+  const STUDENT_SERVICE_URL = "http://localhost:5001";
+  const TEACHER_SERVICE_URL = "http://localhost:5002";
+  const EMPLOYEE_SERVICE_URL = "http://localhost:5003";
 
   // // API Base URLs for each service - ADD trailing slashes
   // const STUDENT_SERVICE_URL = "https://nasirtechtalks.com/std"; //Here "/std" is define  ingress path to setect student-services
