@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: employee-service
-        image: nanil0034/kindergarten-registry-employee:43
+        image: nanil0034/kindergarten-registry-employee:44
         ports:
         - containerPort: 5003
         env:
