@@ -27,7 +27,7 @@ function App() {
   const [activeTab, setActiveTab] = useState("students");
 
   const STUDENT_SERVICE_URL = "http://192.168.121.114:30001";
-  const TEACHER_SERVICE_URL = "http://192.168.121.114:30003";
+  const TEACHER_SERVICE_URL = "http://192.168.121.114:30002";
   const EMPLOYEE_SERVICE_URL = "http://192.168.121.114:30003";
 
   // // API Base URLs for each service - ADD trailing slashes
