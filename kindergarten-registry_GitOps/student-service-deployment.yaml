@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: student-service
-        image: nanil0034/kindergarten-registry-student:46
+        image: nanil0034/kindergarten-registry-student:45
         ports:
         - containerPort: 5001
         env:
@@ -54,4 +54,5 @@ spec:
   ports:
     - protocol: TCP
       port: 5001
-  type: ClusterIP
+      nodePort: 30001
+  type: NodePort
