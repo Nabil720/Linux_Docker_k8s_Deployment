@@ -54,7 +54,7 @@ func main() {
 	}
 
 	// Student Routes
-	http.HandleFunc("/add-student", func(w http.ResponseWriter, r *http.Request) {   // Here using this  "/std/add-student" path , we POST in  the Add-student service 
+	http.HandleFunc("/std/add-student", func(w http.ResponseWriter, r *http.Request) {   // Here using this  "/std/add-student" path , we POST in  the Add-student service 
 		enableCors(w)
 		if r.Method == http.MethodOptions {
 			return
@@ -62,7 +62,7 @@ func main() {
 		apmMiddleware(handlers.AddStudent, "POST /add-student")(w, r)
 	})
 
-	http.HandleFunc("/students", func(w http.ResponseWriter, r *http.Request) {         // Here using this  "/std/students" path , we GET students  
+	http.HandleFunc("/std/students", func(w http.ResponseWriter, r *http.Request) {         // Here using this  "/std/students" path , we GET students  
 		enableCors(w)
 		enableCors(w)
 		if r.Method == http.MethodOptions {
@@ -71,7 +71,7 @@ func main() {
 		apmMiddleware(handlers.GetStudents, "GET /students")(w, r)
 	})
 
-	http.HandleFunc("/delete-student", func(w http.ResponseWriter, r *http.Request) {    // Here using this  "/std/delete-student" path , we DELETE in  the Students  service 
+	http.HandleFunc("/std/delete-student", func(w http.ResponseWriter, r *http.Request) {    // Here using this  "/std/delete-student" path , we DELETE in  the Students  service 
 		enableCors(w)
 		enableCors(w)
 		if r.Method == http.MethodOptions {
@@ -84,7 +84,7 @@ func main() {
 		apmMiddleware(handlers.DeleteStudent, "DELETE /delete-student")(w, r)
 	})
 
-	http.HandleFunc("/update-student", func(w http.ResponseWriter, r *http.Request) {  // Here using this  "/std/update-student" path , we PUT in  the Students service 
+	http.HandleFunc("/std/update-student", func(w http.ResponseWriter, r *http.Request) {  // Here using this  "/std/update-student" path , we PUT in  the Students service 
 		enableCors(w)
 		if r.Method == http.MethodOptions {
 			return
