@@ -27,8 +27,6 @@ pipeline {
 
 
 
-
-
         /* ---------------------- Build Multiple Docker Images ---------------------- */
 
         stage('Build Student Service Docker Image') {
