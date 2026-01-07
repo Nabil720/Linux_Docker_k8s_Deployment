@@ -1,94 +1,33 @@
+
+
+
 pipeline {
     agent any
     environment {
         DOCKER_HUB_REPO = "nanil0034/kindergarten-registry"
         SSH_CREDENTIALS = 'vm-ssh-key'
         REMOTE_SERVER_IP = '192.168.121.188'
-        GITOPS_REPO = "https://github.com/Nabil720/Linux_Docker_k8s_Deployment.git"
-        GITOPS_REPO_PATH = "kindergarten-registry_GitOps"
-        K8S_SOURCE_PATH = "kindergarten-registry_k8s"
         GIT_BRANCH = "main"
-
-        // Use the exact SonarQube **Name** as configured in Jenkins (Manage Jenkins -> Configure System -> SonarQube servers)
-        SONARQUBE_ENV = "Sonar"   // <- change this if your SonarQube name is different
+        SONARQUBE_ENV = "Sonar"
     }
 
     stages {
         stage('Git pull') {
             steps {
                 echo "========Code Cloning========"
-                git url: 'https://github.com/Nabil720/Linux_Docker_k8s_Deployment.git', branch: "${GIT_BRANCH}"
+                sh """
+                    rm -rf Linux_Docker_k8s_Deployment
+                    git clone https://github.com/Nabil720/Linux_Docker_k8s_Deployment.git
+                    cd Linux_Docker_k8s_Deployment
+                """
                 echo "Code cloning Successful"
-                echo "Working dir: ${pwd()}"
-                sh "ls -la"
+                sh "pwd && ls -la"
             }
         }
 
-        /* ---------------------- 🛡️ DEVSECOPS STAGES ---------------------- */
 
-        stage('Trivy: Filesystem scan') {
-            steps {
-                echo "========Running Trivy Scan (filesystem)========"
-                sh '''
-                    # create output directory
-                    mkdir -p reports
-                    # Scan filesystem for HIGH/CRITICAL; continue pipeline even if found
-                    trivy fs --exit-code 0 --severity HIGH,CRITICAL --format json -o reports/trivy_report.json .
-                    # Also produce a simple text summary
-                    trivy fs --severity HIGH,CRITICAL --format table . | tee reports/trivy_summary.txt || true
-                    echo "Trivy reports saved to reports/"
-                '''
-            }
-            post {
-                always {
-                    archiveArtifacts artifacts: 'reports/**', allowEmptyArchive: true
-                }
-            }
-        }
 
-        stage('OWASP: Dependency check') {
-            steps {
-                echo "========Running OWASP Dependency Check========"
-                script {
-                    // run dependency-check (plugin step)
-                    dependencyCheck additionalArguments: '--scan . --format HTML --out dependency-check-report', odcInstallation: 'dc'
-                }
-            }
-            post {
-                always {
-                    // publish any generated HTML report (pattern may need adjusting depending on plugin output path)
-                    dependencyCheckPublisher pattern: '**/dependency-check-report.html'
-                    archiveArtifacts artifacts: 'dependency-check-report/**', allowEmptyArchive: true
-                }
-            }
-        }
 
-        stage('SonarQube: Code Analysis') {
-            steps {
-                echo "========Running SonarQube Analysis========"
-                script {
-                    // Use SonarScanner global tool if installed via Manage Jenkins -> Global Tool Configuration
-                    def scannerHome = tool name: 'Sonar', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
-                    withSonarQubeEnv("${SONARQUBE_ENV}") {
-                        sh """
-                            ${scannerHome}/bin/sonar-scanner \
-                              -Dsonar.projectKey=kindergarten-registry \
-                              -Dsonar.sources=. \
-                              -Dsonar.host.url=$SONAR_HOST_URL \
-                              -Dsonar.login=$SONAR_AUTH_TOKEN
-                        """
-                    }
-                }
-            }
-        }
-
-        stage('SonarQube: Code Quality Gate') {
-            steps {
-                timeout(time: 2, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: false
-                }
-            }
-        }
 
         /* ---------------------- Build Multiple Docker Images ---------------------- */
 
@@ -96,7 +35,9 @@ pipeline {
             steps {
                 echo "========Building Student Service Docker Image========"
                 sh """
-                    cd ${K8S_SOURCE_PATH}/studentservice
+                    cd Linux_Docker_k8s_Deployment/kindergarten-registry_k8s/studentservice
+                    pwd
+                    ls -la
                     docker build -t ${DOCKER_HUB_REPO}-student:${BUILD_NUMBER} .
                 """
             }
@@ -106,7 +47,9 @@ pipeline {
             steps {
                 echo "========Building Teacher Service Docker Image========"
                 sh """
-                    cd ${K8S_SOURCE_PATH}/teacherservice
+                    cd Linux_Docker_k8s_Deployment/kindergarten-registry_k8s/teacherservice
+                    pwd
+                    ls -la
                     docker build -t ${DOCKER_HUB_REPO}-teacher:${BUILD_NUMBER} .
                 """
             }
@@ -116,7 +59,9 @@ pipeline {
             steps {
                 echo "========Building Employee Service Docker Image========"
                 sh """
-                    cd ${K8S_SOURCE_PATH}/employeeservice
+                    cd Linux_Docker_k8s_Deployment/kindergarten-registry_k8s/employeeservice
+                    pwd
+                    ls -la
                     docker build -t ${DOCKER_HUB_REPO}-employee:${BUILD_NUMBER} .
                 """
             }
@@ -126,7 +71,9 @@ pipeline {
             steps {
                 echo "========Building Frontend Docker Image========"
                 sh """
-                    cd ${K8S_SOURCE_PATH}/frontend
+                    cd Linux_Docker_k8s_Deployment/kindergarten-registry_k8s/frontend
+                    pwd
+                    ls -la
                     docker build -t ${DOCKER_HUB_REPO}-frontend:${BUILD_NUMBER} .
                 """
             }
@@ -151,33 +98,68 @@ pipeline {
             steps {
                 echo "========Updating GitOps Repo with New Image Tags========"
                 withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
-                    sh """
-                    # Navigate to GitOps directory
-                    cd ${GITOPS_REPO_PATH}
+                    script {
+                        sh '''
+                        if [ -d "Linux_Docker_k8s_Deployment" ]; then
+                            echo "Directory exists, removing..."
+                            rm -rf Linux_Docker_k8s_Deployment
+                        fi
+                        
+                        # Clone and work with master branch instead of main
+                        git clone https://x-access-token:${GITHUB_TOKEN}@github.com/Nabil720/Linux_Docker_k8s_Deployment.git
+                        cd Linux_Docker_k8s_Deployment
+                        
+                        # Check current branches and switch to master
+                        echo "Available branches:"
+                        git branch -a
+                        
+                        # Use master branch (your repository has master, not main)
+                        git checkout master
+                        cd kindergarten-registry_GitOps
 
-                    # Configure git
-                    git config --global user.email "nabilfaruk6@gmail.com"
-                    git config --global user.name "Nabil"
+                        # Configure git
+                        git config --global user.email "nabilfaruk6@gmail.com"
+                        git config --global user.name "Nabil"
 
-                    # Update image tags in all deployment files
-                    sed -i "s|image: ${DOCKER_HUB_REPO}-student:.*|image: ${DOCKER_HUB_REPO}-student:${BUILD_NUMBER}|" student-service-deployment.yaml
-                    sed -i "s|image: ${DOCKER_HUB_REPO}-teacher:.*|image: ${DOCKER_HUB_REPO}-teacher:${BUILD_NUMBER}|" teacher-service-deployment.yaml
-                    sed -i "s|image: ${DOCKER_HUB_REPO}-employee:.*|image: ${DOCKER_HUB_REPO}-employee:${BUILD_NUMBER}|" employee-service-deployment.yaml
-                    sed -i "s|image: ${DOCKER_HUB_REPO}-frontend:.*|image: ${DOCKER_HUB_REPO}-frontend:${BUILD_NUMBER}|" frontend-deployment.yaml
+                        # Update image tags
+                        sed -i "s|image: ${DOCKER_HUB_REPO}-student:.*|image: ${DOCKER_HUB_REPO}-student:${BUILD_NUMBER}|" student-service-deployment.yaml
+                        sed -i "s|image: ${DOCKER_HUB_REPO}-teacher:.*|image: ${DOCKER_HUB_REPO}-teacher:${BUILD_NUMBER}|" teacher-service-deployment.yaml
+                        sed -i "s|image: ${DOCKER_HUB_REPO}-employee:.*|image: ${DOCKER_HUB_REPO}-employee:${BUILD_NUMBER}|" employee-service-deployment.yaml
+                        sed -i "s|image: ${DOCKER_HUB_REPO}-frontend:.*|image: ${DOCKER_HUB_REPO}-frontend:${BUILD_NUMBER}|" frontend-deployment.yaml
 
-                    # Check if there are changes to commit
-                    git add .
-                    if git diff --cached --quiet; then
-                        echo "No changes to commit."
-                    else
-                        git commit -m "Update all images to version ${BUILD_NUMBER}"
-                        git push https://x-access-token:${GITHUB_TOKEN}@github.com/Nabil720/Linux_Docker_k8s_Deployment.git ${GIT_BRANCH}
-                    fi
-                    """
+                        git add .
+                        if git diff --cached --quiet; then
+                            echo "No changes to commit."
+                        else
+                            git commit -m "Jenkins: Update all images to version ${BUILD_NUMBER}"
+                            git push origin master
+                        fi
+                        '''
+                    }
                 }
             }
         }
 
+
+        // stage('Deploy to Kubernetes') {
+        //     steps {
+        //         echo "========Deploying to Kubernetes========"
+        //         withCredentials([sshUserPrivateKey(credentialsId: "${SSH_CREDENTIALS}", keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER')]) {
+        //             sh """
+        //             ssh -o StrictHostKeyChecking=no -i ${SSH_KEY} ${SSH_USER}@${REMOTE_SERVER_IP} "
+        //                 cd Linux_Docker_k8s_Deployment/kindergarten-registry_GitOps &&
+        //                 kubectl apply -f mongo-deployment.yaml &&
+        //                 kubectl apply -f student-service-deployment.yaml &&
+        //                 kubectl apply -f teacher-service-deployment.yaml &&
+        //                 kubectl apply -f employee-service-deployment.yaml &&
+        //                 kubectl apply -f frontend-deployment.yaml &&
+        //                 kubectl apply -f ingress.yaml &&
+        //                 echo 'Deployment completed successfully!'
+        //             "
+        //             """
+        //         }
+        //     }
+        // }
 
     }
 
@@ -194,3 +176,204 @@ pipeline {
         }
     }
 }
+
+
+
+
+
+// pipeline {
+//     agent any
+//     environment {
+//         DOCKER_HUB_REPO = "nanil0034/kindergarten-registry"
+//         SSH_CREDENTIALS = 'vm-ssh-key'
+//         REMOTE_SERVER_IP = '192.168.121.188'
+//         GITOPS_REPO = "https://github.com/Nabil720/Linux_Docker_k8s_Deployment.git"
+//         GITOPS_REPO_PATH = "kindergarten-registry_GitOps"
+//         K8S_SOURCE_PATH = "kindergarten-registry_k8s"
+//         GIT_BRANCH = "main"
+
+//         // Use the exact SonarQube **Name** as configured in Jenkins (Manage Jenkins -> Configure System -> SonarQube servers)
+//         SONARQUBE_ENV = "Sonar"   // <- change this if your SonarQube name is different
+//     }
+
+//     stages {
+//         stage('Git pull') {
+//             steps {
+//                 echo "========Code Cloning========"
+//                 git url: 'https://github.com/Nabil720/Linux_Docker_k8s_Deployment.git', branch: "${GIT_BRANCH}"
+//                 echo "Code cloning Successful"
+//                 echo "Working dir: ${pwd()}"
+//                 sh "ls -la"
+//             }
+//         }
+
+//         /* ---------------------- 🛡️ DEVSECOPS STAGES ---------------------- */
+
+//         stage('Trivy: Filesystem scan') {
+//             steps {
+//                 echo "========Running Trivy Scan (filesystem)========"
+//                 sh '''
+//                     # create output directory
+//                     mkdir -p reports
+//                     # Scan filesystem for HIGH/CRITICAL; continue pipeline even if found
+//                     trivy fs --exit-code 0 --severity HIGH,CRITICAL --format json -o reports/trivy_report.json .
+//                     # Also produce a simple text summary
+//                     trivy fs --severity HIGH,CRITICAL --format table . | tee reports/trivy_summary.txt || true
+//                     echo "Trivy reports saved to reports/"
+//                 '''
+//             }
+//             post {
+//                 always {
+//                     archiveArtifacts artifacts: 'reports/**', allowEmptyArchive: true
+//                 }
+//             }
+//         }
+
+//         stage('OWASP: Dependency check') {
+//             steps {
+//                 echo "========Running OWASP Dependency Check========"
+//                 script {
+//                     // run dependency-check (plugin step)
+//                     dependencyCheck additionalArguments: '--scan . --format HTML --out dependency-check-report', odcInstallation: 'dc'
+//                 }
+//             }
+//             post {
+//                 always {
+//                     // publish any generated HTML report (pattern may need adjusting depending on plugin output path)
+//                     dependencyCheckPublisher pattern: '**/dependency-check-report.html'
+//                     archiveArtifacts artifacts: 'dependency-check-report/**', allowEmptyArchive: true
+//                 }
+//             }
+//         }
+
+//         stage('SonarQube: Code Analysis') {
+//             steps {
+//                 echo "========Running SonarQube Analysis========"
+//                 script {
+//                     // Use SonarScanner global tool if installed via Manage Jenkins -> Global Tool Configuration
+//                     def scannerHome = tool name: 'Sonar', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
+//                     withSonarQubeEnv("${SONARQUBE_ENV}") {
+//                         sh """
+//                             ${scannerHome}/bin/sonar-scanner \
+//                               -Dsonar.projectKey=kindergarten-registry \
+//                               -Dsonar.sources=. \
+//                               -Dsonar.host.url=$SONAR_HOST_URL \
+//                               -Dsonar.login=$SONAR_AUTH_TOKEN
+//                         """
+//                     }
+//                 }
+//             }
+//         }
+
+//         stage('SonarQube: Code Quality Gate') {
+//             steps {
+//                 timeout(time: 2, unit: 'MINUTES') {
+//                     waitForQualityGate abortPipeline: false
+//                 }
+//             }
+//         }
+
+//         /* ---------------------- Build Multiple Docker Images ---------------------- */
+
+//         stage('Build Student Service Docker Image') {
+//             steps {
+//                 echo "========Building Student Service Docker Image========"
+//                 sh """
+//                     cd ${K8S_SOURCE_PATH}/studentservice
+//                     docker build -t ${DOCKER_HUB_REPO}-student:${BUILD_NUMBER} .
+//                 """
+//             }
+//         }
+
+//         stage('Build Teacher Service Docker Image') {
+//             steps {
+//                 echo "========Building Teacher Service Docker Image========"
+//                 sh """
+//                     cd ${K8S_SOURCE_PATH}/teacherservice
+//                     docker build -t ${DOCKER_HUB_REPO}-teacher:${BUILD_NUMBER} .
+//                 """
+//             }
+//         }
+
+//         stage('Build Employee Service Docker Image') {
+//             steps {
+//                 echo "========Building Employee Service Docker Image========"
+//                 sh """
+//                     cd ${K8S_SOURCE_PATH}/employeeservice
+//                     docker build -t ${DOCKER_HUB_REPO}-employee:${BUILD_NUMBER} .
+//                 """
+//             }
+//         }
+
+//         stage('Build Frontend Docker Image') {
+//             steps {
+//                 echo "========Building Frontend Docker Image========"
+//                 sh """
+//                     cd ${K8S_SOURCE_PATH}/frontend
+//                     docker build -t ${DOCKER_HUB_REPO}-frontend:${BUILD_NUMBER} .
+//                 """
+//             }
+//         }
+
+//         stage('Login to Docker Hub & Push Images') {
+//             steps {
+//                 echo "========Pushing Docker Images to Docker Hub========"
+//                 withCredentials([usernamePassword(credentialsId: 'dockerHubCred', passwordVariable: 'DOCKER_PASS', usernameVariable: 'DOCKER_USER')]) {
+//                     sh """
+//                     echo "\$DOCKER_PASS" | docker login -u "\$DOCKER_USER" --password-stdin
+//                     docker push ${DOCKER_HUB_REPO}-student:${BUILD_NUMBER}
+//                     docker push ${DOCKER_HUB_REPO}-teacher:${BUILD_NUMBER}
+//                     docker push ${DOCKER_HUB_REPO}-employee:${BUILD_NUMBER}
+//                     docker push ${DOCKER_HUB_REPO}-frontend:${BUILD_NUMBER}
+//                     """
+//                 }
+//             }
+//         }
+
+//         stage('Update GitOps Repo with New Image Tags') {
+//             steps {
+//                 echo "========Updating GitOps Repo with New Image Tags========"
+//                 withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
+//                     sh """
+//                     # Navigate to GitOps directory
+//                     cd ${GITOPS_REPO_PATH}
+
+//                     # Configure git
+//                     git config --global user.email "nabilfaruk6@gmail.com"
+//                     git config --global user.name "Nabil"
+
+//                     # Update image tags in all deployment files
+//                     sed -i "s|image: ${DOCKER_HUB_REPO}-student:.*|image: ${DOCKER_HUB_REPO}-student:${BUILD_NUMBER}|" student-service-deployment.yaml
+//                     sed -i "s|image: ${DOCKER_HUB_REPO}-teacher:.*|image: ${DOCKER_HUB_REPO}-teacher:${BUILD_NUMBER}|" teacher-service-deployment.yaml
+//                     sed -i "s|image: ${DOCKER_HUB_REPO}-employee:.*|image: ${DOCKER_HUB_REPO}-employee:${BUILD_NUMBER}|" employee-service-deployment.yaml
+//                     sed -i "s|image: ${DOCKER_HUB_REPO}-frontend:.*|image: ${DOCKER_HUB_REPO}-frontend:${BUILD_NUMBER}|" frontend-deployment.yaml
+
+//                     # Check if there are changes to commit
+//                     git add .
+//                     if git diff --cached --quiet; then
+//                         echo "No changes to commit."
+//                     else
+//                         git commit -m "Update all images to version ${BUILD_NUMBER}"
+//                         git push https://x-access-token:${GITHUB_TOKEN}@github.com/Nabil720/Linux_Docker_k8s_Deployment.git ${GIT_BRANCH}
+//                     fi
+//                     """
+//                 }
+//             }
+//         }
+
+
+//     }
+
+//     post {
+//         always {
+//             echo "Pipeline finished. Collecting artifacts if any."
+//             sh "docker logout"
+//         }
+//         success {
+//             echo "Pipeline completed successfully."
+//         }
+//         failure {
+//             echo "Pipeline failed. Check logs."
+//         }
+//     }
+// }
