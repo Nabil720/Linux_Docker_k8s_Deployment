@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: teacher-service
-        image: nanil0034/kindergarten-registry-teacher:7
+        image: nanil0034/kindergarten-registry-teacher:8
         ports:
         - containerPort: 5002
         env:
