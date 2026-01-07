@@ -93,13 +93,14 @@ pipeline {
                     sh '''
                         rm -rf gitops-repo
 
-                        git clone https://x-access-token:${GITHUB_TOKEN}@github.com/Nabil720/Kindergarten-registry_GitOps.git
-                        cd Kindergarten-registry_GitOps
+                        git clone https://x-access-token:${GITHUB_TOKEN}@github.com/Nabil720/Kindergarten-registry_GitOps.git gitops-repo
+                        cd gitops-repo
                         git checkout main
 
                         git config user.email "nabilfaruk6@gmail.com"
                         git config user.name "Nabil"
-                        
+
+
                         sed -i "s|image: ${DOCKER_HUB_REPO}-student:.*|image: ${DOCKER_HUB_REPO}-student:${BUILD_NUMBER}|" student-service-deployment.yaml
                         sed -i "s|image: ${DOCKER_HUB_REPO}-teacher:.*|image: ${DOCKER_HUB_REPO}-teacher:${BUILD_NUMBER}|" teacher-service-deployment.yaml
                         sed -i "s|image: ${DOCKER_HUB_REPO}-employee:.*|image: ${DOCKER_HUB_REPO}-employee:${BUILD_NUMBER}|" employee-service-deployment.yaml
