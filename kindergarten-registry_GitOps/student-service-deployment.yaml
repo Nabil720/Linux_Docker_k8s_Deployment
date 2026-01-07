@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: student-service
-        image: nanil0034/kindergarten-registry-student:10
+        image: nanil0034/kindergarten-registry-student:11
         ports:
         - containerPort: 5001
         env:
