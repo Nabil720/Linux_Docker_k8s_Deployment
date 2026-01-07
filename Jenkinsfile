@@ -105,17 +105,16 @@ pipeline {
                             rm -rf Linux_Docker_k8s_Deployment
                         fi
                         
-                        # Clone and work with master branch instead of main
-                        git clone https://x-access-token:${GITHUB_TOKEN}@github.com/Nabil720/Linux_Docker_k8s_Deployment.git
-                        cd Linux_Docker_k8s_Deployment
+                        # Clone and work with main branch instead of main
+                        git clone https://x-access-token:${GITHUB_TOKEN}@github.com/Nabil720/Kindergarten-registry_GitOps.git
+                        cd Kindergarten-registry_GitOps
                         
-                        # Check current branches and switch to master
+                        # Check current branches and switch to main
                         echo "Available branches:"
                         git branch -a
                         
-                        # Use master branch (your repository has master, not main)
-                        git checkout master
-                        cd kindergarten-registry_GitOps
+                        # Use main branch (your repository has main, not main)
+                        git checkout main
 
                         # Configure git
                         git config --global user.email "nabilfaruk6@gmail.com"
@@ -132,7 +131,7 @@ pipeline {
                             echo "No changes to commit."
                         else
                             git commit -m "Jenkins: Update all images to version ${BUILD_NUMBER}"
-                            git push origin master
+                            git push origin main
                         fi
                         '''
                     }
