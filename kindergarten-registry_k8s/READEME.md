@@ -169,8 +169,6 @@ kindergarten-registry_GitOps$ tree
 
 
 ```
-
-
 ![Website View](./Images/Screenshot%20from%202025-11-11%2014-08-23.png)
 
 
