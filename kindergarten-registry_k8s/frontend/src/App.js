@@ -27,14 +27,14 @@ function App() {
   const [activeTab, setActiveTab] = useState("students");
 
 
-  // const STUDENT_SERVICE_URL = "http://10.70.57.55:30001";
-  // const TEACHER_SERVICE_URL = "http://10.70.57.55:30002";
-  // const EMPLOYEE_SERVICE_URL = "http://10.70.57.55:30003";
+  const STUDENT_SERVICE_URL = "http://192.168.121.114:30001";
+  const TEACHER_SERVICE_URL = "http://192.168.121.114:30002";
+  const EMPLOYEE_SERVICE_URL = "http://192.168.121.114:30003";
 
   // API Base URLs for each service - ADD trailing slashes
-  const STUDENT_SERVICE_URL = "http://nasirtechtalks.com/std"; //Here "/std" is define  ingress path to setect student-services
-  const TEACHER_SERVICE_URL = "http://nasirtechtalks.com/tech"; //Here "/tech" is define  ingress path to setect teacher-services
-  const EMPLOYEE_SERVICE_URL = "http://nasirtechtalks.com/emp";  //Here "/emp" is define  ingress path to setect employee-services
+  // const STUDENT_SERVICE_URL = "http://nasirtechtalks.com/std"; //Here "/std" is define  ingress path to setect student-services
+  // const TEACHER_SERVICE_URL = "http://nasirtechtalks.com/tech"; //Here "/tech" is define  ingress path to setect teacher-services
+  // const EMPLOYEE_SERVICE_URL = "http://nasirtechtalks.com/emp";  //Here "/emp" is define  ingress path to setect employee-services
 
   const fetchStudents = () => {
     fetch(`${STUDENT_SERVICE_URL}/students`)
