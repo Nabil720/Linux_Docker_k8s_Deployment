@@ -197,6 +197,8 @@ pipeline {
 //         SONARQUBE_ENV = "Sonar"   // <- change this if your SonarQube name is different
 //     }
 
+
+
 //     stages {
 //         stage('Git pull') {
 //             steps {
