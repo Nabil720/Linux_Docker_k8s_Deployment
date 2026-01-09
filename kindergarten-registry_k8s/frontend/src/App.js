@@ -207,7 +207,7 @@ function App() {
 
   return (
     <div style={{ padding: 20 }}>
-      <h1>Kindergarten School Registry</h1>
+      <h1>Kindergarten School Registry!!!!!!</h1>
 
       {/* Service Status */}
       <div style={{ marginBottom: "20px", fontSize: "14px", color: "#666" }}>
