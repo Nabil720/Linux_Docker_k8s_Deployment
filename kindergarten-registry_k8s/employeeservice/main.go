@@ -3,8 +3,6 @@ package main
 import (
 	"log"
 	"net/http"
-	"os"
-	"time"
 	"employeeservice/database" 
 	"employeeservice/handlers"
 
