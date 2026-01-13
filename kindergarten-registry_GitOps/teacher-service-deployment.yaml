@@ -27,7 +27,7 @@ spec:
       serviceAccountName: vault-auth
       containers:
       - name: teacher-service
-        image: nanil0034/kindergarten-registry-teacher:56
+        image: nanil0034/kindergarten-registry-teacher:58
         ports:
         - containerPort: 5002
         env:
