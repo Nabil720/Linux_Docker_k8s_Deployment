@@ -30,7 +30,7 @@ spec:
       serviceAccountName: vault-auth
       containers:
       - name: student-service
-        image: nanil0034/kindergarten-registry-student:25
+        image: nanil0034/kindergarten-registry-student:56
         ports:
         - containerPort: 5001
         env:
