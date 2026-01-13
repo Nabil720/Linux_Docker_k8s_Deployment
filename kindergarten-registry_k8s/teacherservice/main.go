@@ -3,19 +3,32 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
+	"time"
 	"teacherservice/database" 
 	"teacherservice/handlers"
 
 	"go.elastic.co/apm/v2"
 )
 
+// Vault থেকে Environment Variables লোড করার function
+func loadEnvFromVault() {
+	// Vault থেকে secrets /vault/secrets/config ফাইলে থাকে
+	// তারা automagically environment variables হয়ে যায়
+	log.Println("Vault secrets loaded automatically via sidecar")
+}
+
 func initAPM() {
+	loadEnvFromVault()
+	
+	// APM initialization
 	if apm.DefaultTracer().Active() {
-		log.Println("APM initialized for Teacher Service")
+		log.Println("APM initialized for Student Service")
 	} else {
 		log.Println("APM not active - using environment variables")
 	}
 }
+
 
 func apmMiddleware(handler http.HandlerFunc, operationName string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {

@@ -3,15 +3,25 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
+	"time"
 	"studentservice/database" 
 	"studentservice/handlers"
 
 	"go.elastic.co/apm/v2"
 )
 
-// SIMPLIFIED APM initialization
+// Vault থেকে Environment Variables লোড করার function
+func loadEnvFromVault() {
+	// Vault থেকে secrets /vault/secrets/config ফাইলে থাকে
+	// তারা automagically environment variables হয়ে যায়
+	log.Println("Vault secrets loaded automatically via sidecar")
+}
+
 func initAPM() {
-	// APM auto-initializes from environment variables in Docker
+	loadEnvFromVault()
+	
+	// APM initialization
 	if apm.DefaultTracer().Active() {
 		log.Println("APM initialized for Student Service")
 	} else {

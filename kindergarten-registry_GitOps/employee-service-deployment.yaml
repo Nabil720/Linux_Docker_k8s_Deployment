@@ -11,38 +11,30 @@ spec:
     metadata:
       labels:
         app: employee-service
+      annotations:
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/role: "kindergarten-role"
+        vault.hashicorp.com/agent-inject-secret-config: "kindergarten/data/config"
+        vault.hashicorp.com/agent-inject-template-config: |
+          {{- with secret "kindergarten/data/config" -}}
+          export MONGODB_URI="{{ .Data.data.mongodb-uri }}"
+          export DATABASE_NAME="{{ .Data.data.database-name }}"
+          export ELASTIC_APM_SERVER_URL="{{ .Data.data.elastic-apm-server-url }}"
+          export ELASTIC_APM_SECRET_TOKEN="{{ .Data.data.elastic-apm-secret-token }}"
+          export ELASTIC_APM_SERVICE_NAME="employee-service"
+          {{- end }}
     spec:
+      serviceAccountName: vault-auth
       containers:
       - name: employee-service
         image: nanil0034/kindergarten-registry-employee:25
         ports:
         - containerPort: 5003
         env:
-        - name: MONGODB_URI
-          valueFrom:
-            secretKeyRef:
-              name: mongo-secret
-              key: mongodb-uri
-        - name: DATABASE_NAME
-          valueFrom:
-            secretKeyRef:
-              name: mongo-secret
-              key: database-name
-        - name: ELASTIC_APM_SERVER_URL
-          valueFrom:
-            secretKeyRef:
-              name: mongo-secret
-              key: elastic-apm-server-url
-        - name: ELASTIC_APM_SECRET_TOKEN
-          valueFrom:
-            secretKeyRef:
-              name: mongo-secret
-              key: elastic-apm-secret-token
         - name: ELASTIC_APM_SERVICE_NAME
-          valueFrom:
-            secretKeyRef:
-              name: mongo-secret
-              key: elastic-apm-service-name-employee
+          value: "employee-service"
+        command: ["/bin/sh"]
+        args: ["-c", "source /vault/secrets/config && /app/employee-service"]
 ---
 apiVersion: v1
 kind: Service
