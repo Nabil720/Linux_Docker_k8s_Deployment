@@ -7,40 +7,7 @@ import (
     "teacherservice/config"
     "teacherservice/database"
     "teacherservice/handlers"
-
-    "go.elastic.co/apm/v2"
 )
-
-func initAPM(apmConfig config.APMConfig) {
-    // Environment variables set করো APM-এর জন্য
-    os.Setenv("ELASTIC_APM_SERVER_URL", apmConfig.ServerURL)
-    os.Setenv("ELASTIC_APM_SECRET_TOKEN", apmConfig.SecretToken)
-    os.Setenv("ELASTIC_APM_ENVIRONMENT", apmConfig.Environment)
-    os.Setenv("ELASTIC_APM_SERVICE_NAME", "teacher-service")
-
-    if apm.DefaultTracer().Active() {
-        log.Println("APM initialized for Teacher Service")
-    } else {
-        log.Println("APM not active - check Vault configuration")
-    }
-}
-
-func apmMiddleware(handler http.HandlerFunc, operationName string) http.HandlerFunc {
-    return func(w http.ResponseWriter, r *http.Request) {
-        tracer := apm.DefaultTracer()
-        if tracer == nil || !tracer.Active() {
-            handler(w, r)
-            return
-        }
-
-        tx := tracer.StartTransaction(operationName, "request")
-        defer tx.End()
-
-        ctx := apm.ContextWithTransaction(r.Context(), tx)
-        req := r.WithContext(ctx)
-        handler(w, req)
-    }
-}
 
 func enableCors(w http.ResponseWriter) {
     w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -57,39 +24,39 @@ func main() {
         log.Fatalf("Failed to initialize Vault client: %v", err)
     }
 
-    // Vault connection health check
-    if err := config.CheckVaultHealth(vaultClient); err != nil {
-        log.Printf("Warning: Vault health check: %v", err)
+    // Get MongoDB secrets from Vault
+    mongoSecrets, err := config.GetMongoDBSecrets(vaultClient)
+    if err != nil {
+        log.Fatalf("Failed to get MongoDB secrets from Vault: %v", err)
     }
 
-    secrets, err := config.GetSecrets(vaultClient, "teacher")
+    // Get port from Vault
+    port, err := config.GetPort(vaultClient, "teacher")
     if err != nil {
-        log.Fatalf("Failed to get secrets from Vault: %v", err)
+        log.Printf("Warning: Failed to get port from Vault, using default 5002: %v", err)
+        port = 5002
     }
 
     log.Println("Successfully loaded configuration from Vault")
-    log.Printf("Service port: %d", secrets.Port)
+    log.Printf("Service port: %d", port)
 
-    // Step 2: APM initialize করো
-    initAPM(secrets.APM)
+    // Step 2: Database connection (এখন Vault থেকে URI পাবে)
+    os.Setenv("MONGODB_URI", mongoSecrets.URI)
+    os.Setenv("DATABASE_NAME", mongoSecrets.Database)
 
-    // Step 3: Database connection (এখন Vault থেকে URI পাবে)
-    os.Setenv("MONGODB_URI", secrets.MongoDB.URI)
-    os.Setenv("DATABASE_NAME", secrets.MongoDB.Database)
-
-    log.Printf("Connecting to MongoDB with URI: %s", secrets.MongoDB.URI)
+    log.Printf("Connecting to MongoDB with URI: %s", mongoSecrets.URI)
     
     if err := database.Connect(); err != nil {
         log.Fatal("Database connection failed:", err)
     }
 
-    // Step 4: HTTP routes setup করো
+    // Step 3: HTTP routes setup করো
     http.HandleFunc("/tech/add-teacher", func(w http.ResponseWriter, r *http.Request) {
         enableCors(w)
         if r.Method == http.MethodOptions {
             return
         }
-        apmMiddleware(handlers.AddTeacher, "POST /add-teacher")(w, r)
+        handlers.AddTeacher(w, r)
     })
 
     http.HandleFunc("/tech/teachers", func(w http.ResponseWriter, r *http.Request) {
@@ -97,7 +64,7 @@ func main() {
         if r.Method == http.MethodOptions {
             return
         }
-        apmMiddleware(handlers.GetTeachers, "GET /teachers")(w, r)
+        handlers.GetTeachers(w, r)
     })
 
     http.HandleFunc("/tech/delete-teacher", func(w http.ResponseWriter, r *http.Request) {
@@ -109,7 +76,7 @@ func main() {
             http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
             return
         }
-        apmMiddleware(handlers.DeleteTeacher, "DELETE /delete-teacher")(w, r)
+        handlers.DeleteTeacher(w, r)
     })
 
     http.HandleFunc("/tech/update-teacher", func(w http.ResponseWriter, r *http.Request) {
@@ -121,7 +88,7 @@ func main() {
             http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
             return
         }
-        apmMiddleware(handlers.UpdateTeacher, "PUT /update-teacher")(w, r)
+        handlers.UpdateTeacher(w, r)
     })
 
     // Health check endpoint
@@ -132,6 +99,6 @@ func main() {
         w.Write([]byte(`{"status": "healthy", "service": "teacher"}`))
     })
 
-    log.Printf("Teacher Service running on port %d", secrets.Port)
+    log.Printf("Teacher Service running on port %d", port)
     log.Fatal(http.ListenAndServe(":5002", nil))
 }

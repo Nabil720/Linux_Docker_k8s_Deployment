@@ -23,8 +23,19 @@ type MongoDBConfig struct {
     Database string `json:"database"`
 }
 
+type APMConfig struct {
+    ServerURL   string `json:"server_url"`
+    SecretToken string `json:"secret_token"`
+    Environment string `json:"environment"`
+}
+
+type ServiceConfig struct {
+    MongoDB MongoDBConfig
+    APM     APMConfig
+    Port    int
+}
+
 func InitVaultClient() (*VaultConfig, error) {
-    // Environment variables থেকে Vault configuration নিবে
     vaultAddr := os.Getenv("VAULT_ADDR")
     if vaultAddr == "" {
         vaultAddr = "http://192.168.121.132:8200"
@@ -54,16 +65,24 @@ func InitVaultClient() (*VaultConfig, error) {
     }, nil
 }
 
-func GetMongoDBSecrets(vc *VaultConfig) (*MongoDBConfig, error) {
+func GetSecrets(vc *VaultConfig, serviceName string) (*ServiceConfig, error) {
     ctx := context.Background()
 
-    // MongoDB secrets পড়ো
     mongoSecret, err := vc.Client.KVv2("kindergarten").Get(ctx, "mongodb")
     if err != nil {
         return nil, fmt.Errorf("failed to read MongoDB secrets: %v", err)
     }
 
-    // Parse MongoDB config
+    apmSecret, err := vc.Client.KVv2("kindergarten").Get(ctx, "apm")
+    if err != nil {
+        return nil, fmt.Errorf("failed to read APM secrets: %v", err)
+    }
+
+    portsSecret, err := vc.Client.KVv2("kindergarten").Get(ctx, "ports")
+    if err != nil {
+        return nil, fmt.Errorf("failed to read ports secrets: %v", err)
+    }
+
     mongoData, err := json.Marshal(mongoSecret.Data)
     if err != nil {
         return nil, err
@@ -74,19 +93,16 @@ func GetMongoDBSecrets(vc *VaultConfig) (*MongoDBConfig, error) {
         return nil, err
     }
 
-    return &mongoConfig, nil
-}
-
-func GetPort(vc *VaultConfig, serviceName string) (int, error) {
-    ctx := context.Background()
-
-    // Ports secrets পড়ো
-    portsSecret, err := vc.Client.KVv2("kindergarten").Get(ctx, "ports")
+    apmData, err := json.Marshal(apmSecret.Data)
     if err != nil {
-        return 0, fmt.Errorf("failed to read ports secrets: %v", err)
+        return nil, err
     }
 
-    // Get service-specific port
+    var apmConfig APMConfig
+    if err := json.Unmarshal(apmData, &apmConfig); err != nil {
+        return nil, err
+    }
+
     var port int
     switch serviceName {
     case "student":
@@ -111,5 +127,25 @@ func GetPort(vc *VaultConfig, serviceName string) (int, error) {
         port = 5000
     }
 
-    return port, nil
+    return &ServiceConfig{
+        MongoDB: mongoConfig,
+        APM:     apmConfig,
+        Port:    port,
+    }, nil
+}
+
+func GetMongoDBSecrets(vc *VaultConfig) (*MongoDBConfig, error) {
+    secrets, err := GetSecrets(vc, "")
+    if err != nil {
+        return nil, err
+    }
+    return &secrets.MongoDB, nil
+}
+
+func GetPort(vc *VaultConfig, serviceName string) (int, error) {
+    secrets, err := GetSecrets(vc, serviceName)
+    if err != nil {
+        return 0, err
+    }
+    return secrets.Port, nil
 }
