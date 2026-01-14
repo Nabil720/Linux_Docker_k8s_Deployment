@@ -1,137 +1,115 @@
 package config
 
 import (
-	"context"
-	"encoding/json"
-	"fmt"
-	"log"
-	"os"
-	"time"
+    "context"
+    "encoding/json"
+    "fmt"
+    "os"
+    "time"
 
-	"github.com/hashicorp/vault/api"
+    "github.com/hashicorp/vault/api"
 )
 
 type VaultConfig struct {
-	Address string
-	Token   string
-	Client  *api.Client
+    Address string
+    Token   string
+    Client  *api.Client
 }
 
 type MongoDBConfig struct {
-	URI      string `json:"uri"`
-	Username string `json:"username"`
-	Password string `json:"password"`
-	Database string `json:"database"`
-}
-
-type APMConfig struct {
-	ServerURL   string `json:"server_url"`
-	SecretToken string `json:"secret_token"`
-	Environment string `json:"environment"`
-}
-
-type ServiceConfig struct {
-	MongoDB MongoDBConfig
-	APM     APMConfig
-	Port    int
+    URI      string `json:"uri"`
+    Username string `json:"username"`
+    Password string `json:"password"`
+    Database string `json:"database"`
 }
 
 func InitVaultClient() (*VaultConfig, error) {
-	// Environment variables থেকে Vault configuration নিবে
-	vaultAddr := os.Getenv("VAULT_ADDR")
-	if vaultAddr == "" {
-		vaultAddr = "http://192.168.121.132:8200"
-	}
+    // Environment variables থেকে Vault configuration নিবে
+    vaultAddr := os.Getenv("VAULT_ADDR")
+    if vaultAddr == "" {
+        vaultAddr = "http://192.168.121.132:8200"
+    }
 
-	vaultToken := os.Getenv("VAULT_TOKEN")
-	if vaultToken == "" {
-		return nil, fmt.Errorf("VAULT_TOKEN environment variable is required")
-	}
+    vaultToken := os.Getenv("VAULT_TOKEN")
+    if vaultToken == "" {
+        return nil, fmt.Errorf("VAULT_TOKEN environment variable is required")
+    }
 
-	config := &api.Config{
-		Address: vaultAddr,
-		Timeout: 10 * time.Second,
-	}
+    config := &api.Config{
+        Address: vaultAddr,
+        Timeout: 10 * time.Second,
+    }
 
-	client, err := api.NewClient(config)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create Vault client: %v", err)
-	}
+    client, err := api.NewClient(config)
+    if err != nil {
+        return nil, fmt.Errorf("failed to create Vault client: %v", err)
+    }
 
-	client.SetToken(vaultToken)
+    client.SetToken(vaultToken)
 
-	return &VaultConfig{
-		Address: vaultAddr,
-		Token:   vaultToken,
-		Client:  client,
-	}, nil
+    return &VaultConfig{
+        Address: vaultAddr,
+        Token:   vaultToken,
+        Client:  client,
+    }, nil
 }
 
-func GetSecrets(vc *VaultConfig, serviceName string) (*ServiceConfig, error) {
-	ctx := context.Background()
+func GetMongoDBSecrets(vc *VaultConfig) (*MongoDBConfig, error) {
+    ctx := context.Background()
 
-	// MongoDB secrets পড়ো
-	mongoSecret, err := vc.Client.KVv2("kindergarten").Get(ctx, "mongodb")
-	if err != nil {
-		return nil, fmt.Errorf("failed to read MongoDB secrets: %v", err)
-	}
+    // MongoDB secrets পড়ো
+    mongoSecret, err := vc.Client.KVv2("kindergarten").Get(ctx, "mongodb")
+    if err != nil {
+        return nil, fmt.Errorf("failed to read MongoDB secrets: %v", err)
+    }
 
-	// APM secrets পড়ো
-	apmSecret, err := vc.Client.KVv2("kindergarten").Get(ctx, "apm")
-	if err != nil {
-		return nil, fmt.Errorf("failed to read APM secrets: %v", err)
-	}
+    // Parse MongoDB config
+    mongoData, err := json.Marshal(mongoSecret.Data)
+    if err != nil {
+        return nil, err
+    }
 
-	// Services secrets পড়ো
-	servicesSecret, err := vc.Client.KVv2("kindergarten").Get(ctx, "services")
-	if err != nil {
-		return nil, fmt.Errorf("failed to read services secrets: %v", err)
-	}
+    var mongoConfig MongoDBConfig
+    if err := json.Unmarshal(mongoData, &mongoConfig); err != nil {
+        return nil, err
+    }
 
-	// Ports secrets পড়ো
-	portsSecret, err := vc.Client.KVv2("kindergarten").Get(ctx, "ports")
-	if err != nil {
-		return nil, fmt.Errorf("failed to read ports secrets: %v", err)
-	}
+    return &mongoConfig, nil
+}
 
-	// Parse MongoDB config
-	mongoData, err := json.Marshal(mongoSecret.Data)
-	if err != nil {
-		return nil, err
-	}
+func GetPort(vc *VaultConfig, serviceName string) (int, error) {
+    ctx := context.Background()
 
-	var mongoConfig MongoDBConfig
-	if err := json.Unmarshal(mongoData, &mongoConfig); err != nil {
-		return nil, err
-	}
+    // Ports secrets পড়ো
+    portsSecret, err := vc.Client.KVv2("kindergarten").Get(ctx, "ports")
+    if err != nil {
+        return 0, fmt.Errorf("failed to read ports secrets: %v", err)
+    }
 
-	// Parse APM config
-	apmData, err := json.Marshal(apmSecret.Data)
-	if err != nil {
-		return nil, err
-	}
+    // Get service-specific port
+    var port int
+    switch serviceName {
+    case "student":
+        if portVal, ok := portsSecret.Data["student"].(float64); ok {
+            port = int(portVal)
+        } else {
+            port = 5001
+        }
+    case "teacher":
+        if portVal, ok := portsSecret.Data["teacher"].(float64); ok {
+            port = int(portVal)
+        } else {
+            port = 5002
+        }
+    case "employee":
+        if portVal, ok := portsSecret.Data["employee"].(float64); ok {
+            port = int(portVal)
+        } else {
+            port = 5003
+        }
+    default:
+        port = 5000
+    }
 
-	var apmConfig APMConfig
-	if err := json.Unmarshal(apmData, &apmConfig); err != nil {
-		return nil, err
-	}
-
-	// Get service-specific port
-	var port int
-	switch serviceName {
-	case "student":
-		port = portsSecret.Data["student"].(int)
-	case "teacher":
-		port = portsSecret.Data["teacher"].(int)
-	case "employee":
-		port = portsSecret.Data["employee"].(int)
-	default:
-		port = 5000
-	}
-
-	return &ServiceConfig{
-		MongoDB: mongoConfig,
-		APM:     apmConfig,
-		Port:    port,
-	}, nil
+    return port, nil
 }
