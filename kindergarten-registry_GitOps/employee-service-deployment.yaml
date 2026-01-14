@@ -11,30 +11,43 @@ spec:
     metadata:
       labels:
         app: employee-service
-      annotations:
-        vault.hashicorp.com/agent-inject: "true"
-        vault.hashicorp.com/role: "kindergarten-role"
-        vault.hashicorp.com/agent-inject-secret-config: "kindergarten/data/config"
-        vault.hashicorp.com/agent-inject-template-config: |
-          {{- with secret "kindergarten/data/config" -}}
-          export MONGODB_URI="{{ .Data.data.mongodb-uri }}"
-          export DATABASE_NAME="{{ .Data.data.database-name }}"
-          export ELASTIC_APM_SERVER_URL="{{ .Data.data.elastic-apm-server-url }}"
-          export ELASTIC_APM_SECRET_TOKEN="{{ .Data.data.elastic-apm-secret-token }}"
-          export ELASTIC_APM_SERVICE_NAME="employee-service"
-          {{- end }}
     spec:
-      serviceAccountName: vault-auth
+      serviceAccountName: vault-auth  # Same service account
       containers:
       - name: employee-service
-        image: nanil0034/kindergarten-registry-employee:56
+        image: nanil0034/kindergarten-registry-employee:26
         ports:
         - containerPort: 5003
         env:
-        - name: ELASTIC_APM_SERVICE_NAME
-          value: "employee-service"
-        command: ["/bin/sh"]
-        args: ["-c", "source /vault/secrets/config && /app/employee-service"]
+        # ভাউল্ট অ্যাড্রেস
+        - name: VAULT_ADDR
+          value: "http://192.168.121.132:8200"
+        # Optional: Service account টোকেন মাউন্ট করুন
+        volumeMounts:
+        - name: vault-token
+          mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+          readOnly: true
+        # Health check
+        livenessProbe:
+          httpGet:
+            path: /emp/health
+            port: 5003
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /emp/health
+            port: 5003
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      volumes:
+      - name: vault-token
+        projected:
+          sources:
+          - serviceAccountToken:
+              audience: vault
+              expirationSeconds: 7200
+              path: token
 ---
 apiVersion: v1
 kind: Service

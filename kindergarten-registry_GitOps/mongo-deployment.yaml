@@ -48,21 +48,24 @@ spec:
             - name: mongo-data
               mountPath: /data/db
           env:
+            # ভাউল্ট থেকে লোড হবে service থেকে, এখানে দিতে হবে না
             - name: MONGO_INITDB_ROOT_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: mongo-secret
-                  key: mongo-username
+              value: "myUser"
             - name: MONGO_INITDB_ROOT_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: mongo-secret
-                  key: mongo-password
+              value: "myPassword"
             - name: MONGO_INITDB_DATABASE
-              valueFrom:
-                secretKeyRef:
-                  name: mongo-secret
-                  key: database-name
+              value: "kindergarten"
+          # Health check
+          livenessProbe:
+            tcpSocket:
+              port: 27017
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            tcpSocket:
+              port: 27017
+            initialDelaySeconds: 5
+            periodSeconds: 5
       volumes:
         - name: mongo-data
           persistentVolumeClaim:
