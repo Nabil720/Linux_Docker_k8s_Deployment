@@ -15,7 +15,11 @@ spec:
       serviceAccountName: vault-auth  # Service account যোগ করুন
       containers:
       - name: student-service
+<<<<<<< HEAD
         image: nanil0034/kindergarten-registry-student:26
+=======
+        image: nanil0034/kindergarten-registry-student:58
+>>>>>>> 314c78ac04c18df1151a75d5a02d66ffd6e90536
         ports:
         - containerPort: 5001
         env:
