@@ -47,19 +47,8 @@ spec:
           volumeMounts:
             - name: mongo-data
               mountPath: /data/db
-          # MongoDB credentials will be set by services from Vault
-          # No credentials needed here since services connect using Vault secrets
-          # Health check
-          livenessProbe:
-            tcpSocket:
-              port: 27017
-            initialDelaySeconds: 30
-            periodSeconds: 10
-          readinessProbe:
-            tcpSocket:
-              port: 27017
-            initialDelaySeconds: 5
-            periodSeconds: 5
+          # No credentials here - services will get them from Vault
+          # No probes - basic deployment
       volumes:
         - name: mongo-data
           persistentVolumeClaim:
