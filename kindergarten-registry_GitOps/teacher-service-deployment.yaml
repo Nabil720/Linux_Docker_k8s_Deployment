@@ -2,6 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: teacher-service
+  labels:
+    app: teacher-service
 spec:
   replicas: 1
   selector:
@@ -12,42 +14,25 @@ spec:
       labels:
         app: teacher-service
     spec:
-      serviceAccountName: vault-auth  # Same service account
       containers:
       - name: teacher-service
         image: nanil0034/kindergarten-registry-teacher:59
+        imagePullPolicy: Always
         ports:
         - containerPort: 5002
         env:
-        # ভাউল্ট অ্যাড্রেস
+        # Vault Configuration
         - name: VAULT_ADDR
           value: "http://192.168.121.132:8200"
-        # Optional: Service account টোকেন মাউন্ট করুন
-        volumeMounts:
-        - name: vault-token
-          mountPath: /var/run/secrets/kubernetes.io/serviceaccount
-          readOnly: true
-        # Health check
-        livenessProbe:
-          httpGet:
-            path: /tech/health
-            port: 5002
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /tech/health
-            port: 5002
-          initialDelaySeconds: 5
-          periodSeconds: 5
-      volumes:
-      - name: vault-token
-        projected:
-          sources:
-          - serviceAccountToken:
-              audience: vault
-              expirationSeconds: 7200
-              path: token
+        - name: VAULT_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: vault-tokens
+              key: teacher-token
+        - name: VAULT_SKIP_VERIFY
+          value: "true"
+        - name: SERVICE_NAME
+          value: "teacher"
 ---
 apiVersion: v1
 kind: Service

@@ -47,14 +47,8 @@ spec:
           volumeMounts:
             - name: mongo-data
               mountPath: /data/db
-          env:
-            # ভাউল্ট থেকে লোড হবে service থেকে, এখানে দিতে হবে না
-            - name: MONGO_INITDB_ROOT_USERNAME
-              value: "myUser"
-            - name: MONGO_INITDB_ROOT_PASSWORD
-              value: "myPassword"
-            - name: MONGO_INITDB_DATABASE
-              value: "kindergarten"
+          # MongoDB credentials will be set by services from Vault
+          # No credentials needed here since services connect using Vault secrets
           # Health check
           livenessProbe:
             tcpSocket:

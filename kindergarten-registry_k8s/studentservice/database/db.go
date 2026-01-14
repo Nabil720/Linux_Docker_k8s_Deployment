@@ -14,15 +14,16 @@ var Client *mongo.Client
 var Database *mongo.Database
 
 func Connect() error {
-	// From Environment variables 
+	// Environment variables থেকে MongoDB URI নিবে
+	// (Vault থেকে main.go-তে already set করা হয়েছে)
 	connectionString := os.Getenv("MONGODB_URI")
-	// if connectionString == "" {
-	// 	connectionString = "mongodb://mongo:27017" // default value
-	// }
+	if connectionString == "" {
+		log.Fatal("MONGODB_URI environment variable is not set")
+	}
 
 	databaseName := os.Getenv("DATABASE_NAME")
 	if databaseName == "" {
-		databaseName = "kindergarten" // default value
+		databaseName = "kindergarten"
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -34,7 +35,7 @@ func Connect() error {
 	}
 
 	Client = client
-	Database = client.Database("kindergarten")
+	Database = client.Database(databaseName)
 	log.Println("Connected to MongoDB successfully!")
 	return nil
 }

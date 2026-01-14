@@ -2,6 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: student-service
+  labels:
+    app: student-service
 spec:
   replicas: 1
   selector:
@@ -12,29 +14,25 @@ spec:
       labels:
         app: student-service
     spec:
-      serviceAccountName: vault-auth  # Service account যোগ করুন
       containers:
       - name: student-service
         image: nanil0034/kindergarten-registry-student:59
+        imagePullPolicy: Always
         ports:
         - containerPort: 5001
         env:
-        # ভাউল্ট অ্যাড্রেস
+        # Vault Configuration
         - name: VAULT_ADDR
           value: "http://192.168.121.132:8200"
-        # Service account টোকেন মাউন্ট করুন
-        volumeMounts:
-        - name: vault-token
-          mountPath: /var/run/secrets/kubernetes.io/serviceaccount
-          readOnly: true
-      volumes:
-      - name: vault-token
-        projected:
-          sources:
-          - serviceAccountToken:
-              audience: vault
-              expirationSeconds: 7200
-              path: token
+        - name: VAULT_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: vault-tokens
+              key: student-token
+        - name: VAULT_SKIP_VERIFY
+          value: "true"
+        - name: SERVICE_NAME
+          value: "student"
 ---
 apiVersion: v1
 kind: Service
@@ -46,5 +44,6 @@ spec:
   ports:
     - protocol: TCP
       port: 5001
+      targetPort: 5001
       nodePort: 30001
   type: NodePort
