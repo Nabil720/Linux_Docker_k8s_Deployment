@@ -15,11 +15,7 @@ spec:
       serviceAccountName: vault-auth  # Same service account
       containers:
       - name: teacher-service
-<<<<<<< HEAD
-        image: nanil0034/kindergarten-registry-teacher:26
-=======
-        image: nanil0034/kindergarten-registry-teacher:58
->>>>>>> 314c78ac04c18df1151a75d5a02d66ffd6e90536
+        image: nanil0034/kindergarten-registry-teacher:59
         ports:
         - containerPort: 5002
         env:
