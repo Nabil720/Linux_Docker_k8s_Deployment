@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: student-service
-        image: nanil0034/kindergarten-registry-student:79  # Latest build number ব্যবহার করুন
+        image: nanil0034/kindergarten-registry-student:84
         imagePullPolicy: Always
         ports:
         - containerPort: 5001
