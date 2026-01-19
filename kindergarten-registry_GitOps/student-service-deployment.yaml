@@ -16,23 +16,22 @@ spec:
     spec:
       containers:
       - name: student-service
-        image: nanil0034/kindergarten-registry-student:65
+        image: nanil0034/kindergarten-registry-student:79  # Latest build number ব্যবহার করুন
         imagePullPolicy: Always
         ports:
         - containerPort: 5001
         env:
-        # Vault Configuration
+        # Vault Configuration - VAULT_TOKEN বাদ দিন কারণ Dockerfile এ আছে
         - name: VAULT_ADDR
           value: "http://192.168.121.132:8200"
-        - name: VAULT_TOKEN
-          valueFrom:
-            secretKeyRef:
-              name: vault-tokens
-              key: student-token
-        - name: VAULT_SKIP_VERIFY
-          value: "true"
         - name: SERVICE_NAME
           value: "student"
+        # VAULT_TOKEN env variable remove করুন
+        # - name: VAULT_TOKEN
+        #   valueFrom:
+        #     secretKeyRef:
+        #       name: vault-tokens
+        #       key: student-token
 ---
 apiVersion: v1
 kind: Service
