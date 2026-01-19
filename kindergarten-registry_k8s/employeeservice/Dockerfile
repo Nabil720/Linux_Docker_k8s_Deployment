@@ -3,14 +3,16 @@ FROM golang:1.23 AS builder
 
 WORKDIR /app
 
+# Copy go.mod and go.sum first
 COPY go.mod go.sum ./
-RUN go mod download
 
+# Download dependencies and tidy them
+RUN go mod download && go mod tidy
+
+# Copy source code
 COPY . .
 
-# .env file আছে কিনা check করো
-RUN if [ -f .env ]; then echo "✅ .env file found"; else echo "⚠️  No .env file"; fi
-
+# Build the application
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-w -s" -o main .
 
 # Stage 2: Runtime stage
@@ -20,15 +22,16 @@ WORKDIR /app
 
 RUN apk --no-cache add ca-certificates
 
-# Copy binary এবং .env file
+# Copy binary
 COPY --from=builder /app/main .
-COPY --from=builder /app/.env .env 2>/dev/null || echo "ℹ️  No .env file to copy"
+
+# Copy .env file if it exists
+COPY --from=builder /app/.env .env 2>/dev/null || :
 
 RUN adduser -D -g '' appuser
 USER appuser
 
 CMD ["./main"]
-
 
 
 
