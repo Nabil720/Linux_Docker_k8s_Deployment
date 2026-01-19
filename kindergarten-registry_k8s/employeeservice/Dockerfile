@@ -3,11 +3,11 @@ FROM golang:1.23 AS builder
 
 WORKDIR /app
 
-# Copy go.mod and go.sum first
+# Copy only go.mod first to cache dependencies
 COPY go.mod go.sum ./
 
-# Download dependencies and tidy them
-RUN go mod download && go mod tidy
+# Download ALL dependencies (not just in go.mod)
+RUN go mod download
 
 # Copy source code
 COPY . .
@@ -32,7 +32,6 @@ RUN adduser -D -g '' appuser
 USER appuser
 
 CMD ["./main"]
-
 
 
 
