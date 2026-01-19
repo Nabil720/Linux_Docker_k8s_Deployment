@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: nanil0034/kindergarten-registry-frontend:65
+        image: nanil0034/kindergarten-registry-frontend:79
         ports:
         - containerPort: 80
 

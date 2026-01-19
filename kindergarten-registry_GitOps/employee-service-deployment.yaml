@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: employee-service
-        image: nanil0034/kindergarten-registry-employee:65
+        image: nanil0034/kindergarten-registry-employee:79
         imagePullPolicy: Always
         ports:
         - containerPort: 5003
