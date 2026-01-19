@@ -1,11 +1,6 @@
 # Stage 1: Build stage
 FROM golang:1.23 AS builder
 
-# Build arguments for Vault configuration
-ARG VAULT_ADDR
-ARG VAULT_TOKEN
-ARG SERVICE_NAME
-
 WORKDIR /app
 
 COPY go.mod go.sum ./
@@ -13,32 +8,26 @@ RUN go mod download
 
 COPY . .
 
-# Create config file from build arguments
-RUN echo "VAULT_ADDR=${VAULT_ADDR}" > .env && \
-    echo "VAULT_TOKEN=${VAULT_TOKEN}" >> .env && \
-    echo "SERVICE_NAME=${SERVICE_NAME}" >> .env
+# .env file আছে কিনা check করো
+RUN if [ -f .env ]; then echo "✅ .env file found"; else echo "⚠️  No .env file"; fi
 
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-w -s" -o main .
 
-# Stage 2: Lightweight runtime stage
+# Stage 2: Runtime stage
 FROM alpine:latest
 
 WORKDIR /app
 
-# Install CA certificates for HTTPS requests
 RUN apk --no-cache add ca-certificates
 
-# Copy the binary from builder stage
+# Copy binary এবং .env file
 COPY --from=builder /app/main .
-COPY --from=builder /app/.env .env
+COPY --from=builder /app/.env .env 2>/dev/null || echo "ℹ️  No .env file to copy"
 
-# Create non-root user
 RUN adduser -D -g '' appuser
 USER appuser
 
-# Environment variables will be loaded from .env file at runtime
 CMD ["./main"]
-
 
 
 
