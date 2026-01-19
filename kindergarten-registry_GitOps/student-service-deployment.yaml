@@ -21,17 +21,11 @@ spec:
         ports:
         - containerPort: 5001
         env:
-        # Vault Configuration - VAULT_TOKEN বাদ দিন কারণ Dockerfile এ আছে
         - name: VAULT_ADDR
           value: "http://192.168.121.132:8200"
         - name: SERVICE_NAME
           value: "student"
-        # VAULT_TOKEN env variable remove করুন
-        # - name: VAULT_TOKEN
-        #   valueFrom:
-        #     secretKeyRef:
-        #       name: vault-tokens
-        #       key: student-token
+
 ---
 apiVersion: v1
 kind: Service

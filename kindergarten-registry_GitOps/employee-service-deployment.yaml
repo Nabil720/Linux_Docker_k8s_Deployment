@@ -20,14 +20,6 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: 5003
-        # Environment variables remove করুন কারণ Dockerfile এ embedded আছে
-        # env:
-        # - name: VAULT_TOKEN
-        #   valueFrom:
-        #     secretKeyRef:
-        #       name: vault-tokens
-        #       key: employee-token
-        # শুধুমাত্র optional environment variables রাখুন
         env:
         - name: SERVICE_NAME
           value: "employee"
