@@ -101,7 +101,7 @@ services:
     image: nanil0034/kindergarten-registry-student:${TAG:-latest}
     build: 
       context: ./studentservice
-      dockerfile: ./studentservice/Dockerfile
+      dockerfile: ./Dockerfile
     ports:
       - "5001:5001"
     depends_on:
@@ -111,7 +111,7 @@ services:
     image: nanil0034/kindergarten-registry-teacher:${TAG:-latest}
     build: 
       context: ./teacherservice
-      dockerfile: ./teacherservice/Dockerfile
+      dockerfile: ./Dockerfile
     ports:
       - "5002:5002"
     depends_on:
@@ -121,7 +121,7 @@ services:
     image: nanil0034/kindergarten-registry-employee:${TAG:-latest}
     build: 
       context: ./employeeservice
-      dockerfile: ./employeeservice/Dockerfile
+      dockerfile: ./Dockerfile
     ports:
       - "5003:5003"
     depends_on:
