@@ -102,7 +102,7 @@ services:
   student-service:
     image: nanil0034/kindergarten-registry-student:${TAG:-latest}
     build: 
-      context: ./studentservice
+      # context: ./studentservice
       dockerfile: ./studentservice/Dockerfile
     ports:
       - "5001:5001"
@@ -112,7 +112,7 @@ services:
   teacher-service:
     image: nanil0034/kindergarten-registry-teacher:${TAG:-latest}
     build: 
-      context: ./teacherservice
+      # context: ./teacherservice
       dockerfile: ./teacherservice/Dockerfile
     ports:
       - "5002:5002"
@@ -122,7 +122,7 @@ services:
   employee-service:
     image: nanil0034/kindergarten-registry-employee:${TAG:-latest}
     build: 
-      context: ./employeeservice
+      # context: ./employeeservice
       dockerfile: ./employeeservice/Dockerfile
     ports:
       - "5003:5003"
