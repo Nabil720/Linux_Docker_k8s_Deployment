@@ -1,5 +1,6 @@
 services:
   student-service:
+    image: nanil0034/kindergarten-registry-student:${TAG:-latest}
     build: 
       context: ./studentservice
       dockerfile: Dockerfile
@@ -15,6 +16,7 @@ services:
       # - ELASTIC_APM_SERVICE_NAME=${ELASTIC_APM_SERVICE_NAME_STUDENT}
 
   teacher-service:
+    image: nnanil0034/kindergarten-registry-teacher:${TAG:-latest}
     build: 
       context: ./teacherservice
       dockerfile: Dockerfile
@@ -30,6 +32,7 @@ services:
       # - ELASTIC_APM_SERVICE_NAME=${ELASTIC_APM_SERVICE_NAME_TEACHER}
 
   employee-service:
+    image: nanil0034/kindergarten-registry-employee:${TAG:-latest}
     build: 
       context: ./employeeservice
       dockerfile: Dockerfile
@@ -45,6 +48,7 @@ services:
       # - ELASTIC_APM_SERVICE_NAME=${ELASTIC_APM_SERVICE_NAME_EMPLOYEE}
 
   frontend:
+    image: nanil0034/kindergarten-registry-frontend:${TAG:-latest}
     build: ./frontend
     ports:
       - "3000:3000"
