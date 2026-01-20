@@ -97,23 +97,23 @@
 
 
 
-
-  services:
+version: "3"
+services:
   student-service:
     image: nanil0034/kindergarten-registry-student:${TAG:-latest}
     build: 
       context: ./studentservice
-      dockerfile: Dockerfile
+      dockerfile: ./studentservice/Dockerfile
     ports:
       - "5001:5001"
     depends_on:
       - mongo
 
   teacher-service:
-    image: nnanil0034/kindergarten-registry-teacher:${TAG:-latest}
+    image: nanil0034/kindergarten-registry-teacher:${TAG:-latest}
     build: 
       context: ./teacherservice
-      dockerfile: Dockerfile
+      dockerfile: ./teacherservice/Dockerfile
     ports:
       - "5002:5002"
     depends_on:
@@ -123,7 +123,7 @@
     image: nanil0034/kindergarten-registry-employee:${TAG:-latest}
     build: 
       context: ./employeeservice
-      dockerfile: Dockerfile
+      dockerfile: ./employeeservice/Dockerfile
     ports:
       - "5003:5003"
     depends_on:
@@ -142,9 +142,8 @@
     container_name: mongodb
     ports:
       - "27017:27017"
-
     volumes:
       - mongo-data:/data/db
 
-  volumes:
-    mongo-data:
+volumes:
+  mongo-data:
