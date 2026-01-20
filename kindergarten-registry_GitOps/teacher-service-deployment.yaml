@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: teacher-service
-        image: nanil0034/kindergarten-registry-teacher:85
+        image: nanil0034/kindergarten-registry-teacher:86
         imagePullPolicy: Always
         ports:
         - containerPort: 5002
