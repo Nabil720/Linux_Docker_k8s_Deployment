@@ -4,7 +4,7 @@ import (
     "log"
     "net/http"
     "os"
-    "studentservice/config"
+    "strconv"
     "studentservice/database"
     "studentservice/handlers"
 )
@@ -16,41 +16,53 @@ func enableCors(w http.ResponseWriter) {
 }
 
 func main() {
-    // Step 1: Vault থেকে secrets লোড করো
-    log.Println("Initializing Student Service with Vault integration...")
+    log.Println("Initializing Student Service...")
     
-    vaultClient, err := config.InitVaultClient()
-    if err != nil {
-        log.Fatalf("Failed to initialize Vault client: %v", err)
+    // Step 1: Environment variables থেকে
+    mongoURI := os.Getenv("MONGODB_URI")
+    if mongoURI == "" {
+        log.Println("MONGODB_URI not set in environment")
     }
-
-    // Get MongoDB secrets from Vault
-    mongoSecrets, err := config.GetMongoDBSecrets(vaultClient)
-    if err != nil {
-        log.Fatalf("Failed to get MongoDB secrets from Vault: %v", err)
-    }
-
-    // Get port from Vault
-    port, err := config.GetPort(vaultClient, "student")
-    if err != nil {
-        log.Printf("Warning: Failed to get port from Vault, using default 5001: %v", err)
-        port = 5001
-    }
-
-    log.Println("Successfully loaded configuration from Vault")
-    log.Printf("Service port: %d", port)
-
-    // Step 2: Database connection (এখন Vault থেকে URI পাবে)
-    os.Setenv("MONGODB_URI", mongoSecrets.URI)
-    os.Setenv("DATABASE_NAME", mongoSecrets.Database)
-
-    log.Printf("Connecting to MongoDB with URI: %s", mongoSecrets.URI)
     
-    if err := database.Connect(); err != nil {
-        log.Fatal("Database connection failed:", err)
+    portStr := os.Getenv("SERVICE_PORT")
+    port := 5001
+    if portStr != "" {
+        if p, err := strconv.Atoi(portStr); err == nil {
+            port = p
+        } else {
+            log.Println("Invalid SERVICE_PORT value, using default port 5001")
+        }
+    } else {
+        log.Println("SERVICE_PORT not set in environment, using default port 5001")
+    }
+    
+    serviceName := os.Getenv("SERVICE_NAME")
+    if serviceName == "" {
+        log.Println("SERVICE_NAME not set in environment")
+    }
+    
+    // Log the configuration details
+    log.Printf("Service: %s", serviceName)
+    log.Printf("Port: %d", port)
+
+    // Step 2: Database connection
+    if mongoURI != "" {
+        os.Setenv("MONGODB_URI", mongoURI)
+        if err := database.Connect(); err != nil {
+            log.Fatal("Database connection failed:", err)
+        }
+    } else {
+        log.Fatal("Cannot proceed without MongoDB URI")
     }
 
-    // Step 3: HTTP routes setup করো
+    // Step 3: HTTP routes setup
+    setupRoutes()
+    
+    log.Printf("Student Service running on port %d", port)
+    log.Fatal(http.ListenAndServe(":"+strconv.Itoa(port), nil))
+}
+
+func setupRoutes() {
     http.HandleFunc("/std/add-student", func(w http.ResponseWriter, r *http.Request) {
         enableCors(w)
         if r.Method == http.MethodOptions {
@@ -98,7 +110,4 @@ func main() {
         w.WriteHeader(http.StatusOK)
         w.Write([]byte(`{"status": "healthy", "service": "student"}`))
     })
-
-    log.Printf("Student Service running on port %d", port)
-    log.Fatal(http.ListenAndServe(":5001", nil))
 }

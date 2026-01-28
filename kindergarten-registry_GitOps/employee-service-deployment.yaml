@@ -13,18 +13,35 @@ spec:
     metadata:
       labels:
         app: employee-service
+      annotations:
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/role: "kindergarten-role"
+        vault.hashicorp.com/agent-inject-secret-mongodb: "kindergarten/config/mongodb"
+        vault.hashicorp.com/agent-inject-template-mongodb: |
+          {{- with secret "kindergarten/config/mongodb" -}}
+          export MONGODB_URI="{{ .Data.data.uri }}"
+          export MONGODB_USERNAME="{{ .Data.data.username }}"
+          export MONGODB_PASSWORD="{{ .Data.data.password }}"
+          export MONGODB_DATABASE="{{ .Data.data.database }}"
+          {{- end }}
+        vault.hashicorp.com/agent-inject-secret-ports: "kindergarten/config/ports"
+        vault.hashicorp.com/agent-inject-template-ports: |
+          {{- with secret "kindergarten/config/ports" -}}
+          export SERVICE_PORT="{{ .Data.data.employee }}"
+          {{- end }}
+        vault.hashicorp.com/agent-inject-secret-services: "kindergarten/config/services"
+        vault.hashicorp.com/agent-inject-template-services: |
+          {{- with secret "kindergarten/config/services" -}}
+          export SERVICE_NAME="{{ .Data.data.employee }}"
+          {{- end }}
     spec:
+      serviceAccountName: vault-auth
       containers:
       - name: employee-service
-        image: nanil0034/kindergarten-registry-employee:86
+        image: nanil0034/kindergarten-registry-employee:59
         imagePullPolicy: Always
         ports:
         - containerPort: 5003
-        env:
-        - name: SERVICE_NAME
-          value: "employee"
-        - name: VAULT_ADDR
-          value: "http://192.168.121.132:8200"
 ---
 apiVersion: v1
 kind: Service
