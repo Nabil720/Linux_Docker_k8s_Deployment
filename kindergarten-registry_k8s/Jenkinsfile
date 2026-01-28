@@ -20,13 +20,10 @@ pipeline {
                     git clone https://github.com/Nabil720/Linux_Docker_k8s_Deployment.git
                     cd Linux_Docker_k8s_Deployment
                 """
-                echo "Code cloning Successful"
+                echo "Code cloning Successful ...."
                 sh "pwd && ls -la"
             }
         }
-
-
-
 
 
         /* ---------------------- Build Multiple Docker Images ---------------------- */
