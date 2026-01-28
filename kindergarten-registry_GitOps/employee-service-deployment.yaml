@@ -18,22 +18,19 @@ spec:
         vault.hashicorp.com/role: "kindergarten-role"
         vault.hashicorp.com/agent-inject-secret-mongodb: "kindergarten/config/mongodb"
         vault.hashicorp.com/agent-inject-template-mongodb: |
-          {{- with secret "kindergarten/config/mongodb" -}}
-          export MONGODB_URI="{{ .Data.data.uri }}"
-          export MONGODB_USERNAME="{{ .Data.data.username }}"
-          export MONGODB_PASSWORD="{{ .Data.data.password }}"
-          export MONGODB_DATABASE="{{ .Data.data.database }}"
-          {{- end }}
+          {{- $secret := secret "kindergarten/config/mongodb" -}}
+          export MONGODB_URI="{{ $secret.Data.uri }}"
+          export MONGODB_USERNAME="{{ $secret.Data.username }}"
+          export MONGODB_PASSWORD="{{ $secret.Data.password }}"
+          export MONGODB_DATABASE="{{ $secret.Data.database }}"
         vault.hashicorp.com/agent-inject-secret-ports: "kindergarten/config/ports"
         vault.hashicorp.com/agent-inject-template-ports: |
-          {{- with secret "kindergarten/config/ports" -}}
-          export SERVICE_PORT="{{ .Data.data.employee }}"
-          {{- end }}
+          {{- $secret := secret "kindergarten/config/ports" -}}
+          export SERVICE_PORT="{{ $secret.Data.employee }}"
         vault.hashicorp.com/agent-inject-secret-services: "kindergarten/config/services"
         vault.hashicorp.com/agent-inject-template-services: |
-          {{- with secret "kindergarten/config/services" -}}
-          export SERVICE_NAME="{{ .Data.data.employee }}"
-          {{- end }}
+          {{- $secret := secret "kindergarten/config/services" -}}
+          export SERVICE_NAME="{{ $secret.Data.employee }}"
     spec:
       serviceAccountName: vault-auth
       containers:
@@ -42,6 +39,25 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: 5003
+        command: ["/bin/sh"]
+        args: 
+        - -c
+        - |
+          # Load Vault secrets
+          if [ -f /vault/secrets/mongodb ]; then
+            source /vault/secrets/mongodb
+          fi
+          
+          if [ -f /vault/secrets/ports ]; then
+            source /vault/secrets/ports
+          fi
+          
+          if [ -f /vault/secrets/services ]; then
+            source /vault/secrets/services
+          fi
+          
+          # Start application
+          exec /app/main
 ---
 apiVersion: v1
 kind: Service
