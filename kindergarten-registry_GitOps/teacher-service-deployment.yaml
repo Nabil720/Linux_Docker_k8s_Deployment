@@ -16,21 +16,13 @@ spec:
     spec:
       containers:
       - name: teacher-service
-        image: nanil0034/kindergarten-registry-teacher:59
+        image: nanil0034/kindergarten-registry-teacher:86
         imagePullPolicy: Always
         ports:
         - containerPort: 5002
         env:
-        # Vault Configuration
         - name: VAULT_ADDR
           value: "http://192.168.121.132:8200"
-        - name: VAULT_TOKEN
-          valueFrom:
-            secretKeyRef:
-              name: vault-tokens
-              key: teacher-token
-        - name: VAULT_SKIP_VERIFY
-          value: "true"
         - name: SERVICE_NAME
           value: "teacher"
 ---
