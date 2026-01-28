@@ -2,7 +2,7 @@
 FROM node:16 AS deps
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci
+RUN npm install
 
 # Stage 2: Build
 FROM node:16 AS builder
