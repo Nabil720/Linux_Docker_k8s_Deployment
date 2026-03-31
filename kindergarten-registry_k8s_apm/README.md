@@ -1,10 +1,10 @@
-# 🎓 Kindergarten Registry — Kubernetes + Vault + APM Deployment
+#  Kindergarten Registry — Kubernetes + Vault + APM Deployment
 
 A full-stack **React + Go Microservices + MongoDB** application containerized with Docker, published to Docker Hub, and deployed on a **Kubernetes** cluster with **HashiCorp Vault** secrets management and **Elastic APM** observability integration.
 
 ---
 
-## 📑 Table of Contents
+##  Table of Contents
 
 1. [Project Overview](#project-overview)
 2. [Architecture](#architecture)
@@ -376,9 +376,9 @@ curl http://localhost:8200/                  # APM Server
 
 ```
 🔍 Final status check:
-  - Elasticsearch: ✅ Running
-  - Kibana:        ✅ Running
-  - APM Server:    ✅ Running (auth required)
+  - Elasticsearch: Running
+  - Kibana:        Running
+  - APM Server:    Running (auth required)
 ```
 
 ---
@@ -438,7 +438,7 @@ exit
 
 ![APM Traces](./Images/image_original%20(4))
 
-> 📝 Image files sourced from the `Images/` directory in the repository.
+>  Image files sourced from the `Images/` directory in the repository.
 
 ---
 
