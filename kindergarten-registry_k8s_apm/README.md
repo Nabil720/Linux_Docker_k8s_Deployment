@@ -226,21 +226,6 @@ kubectl get pv,pvc
 | `employee-service` | ClusterIP | 5003 |
 | `mongo` | ClusterIP | 27017 |
 
-### MongoDB Persistent Volume
-
-MongoDB runs as a **StatefulSet** with a **PersistentVolume** (1Gi) mounted at `/data/db`, ensuring data survives pod restarts.
-
-```yaml
-# mongo-deployment.yaml (excerpt)
-kind: StatefulSet
-spec:
-  containers:
-    - name: mongo
-      image: mongo:6.0
-      volumeMounts:
-        - name: mongo-data
-          mountPath: /data/db
-```
 
 ### Access the Frontend
 
