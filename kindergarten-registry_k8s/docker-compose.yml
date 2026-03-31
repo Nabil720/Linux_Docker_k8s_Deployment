@@ -9,11 +9,11 @@
 #     depends_on:
 #       - mongo
 #     environment:
-#       # - MONGODB_URI=${MONGODB_URI}
-#       # - DATABASE_NAME=${DATABASE_NAME}
-#       # - ELASTIC_APM_SERVER_URL=${ELASTIC_APM_SERVER_URL}
-#       # - ELASTIC_APM_SECRET_TOKEN=${ELASTIC_APM_SECRET_TOKEN}
-#       # - ELASTIC_APM_SERVICE_NAME=${ELASTIC_APM_SERVICE_NAME_STUDENT}
+#       - MONGODB_URI=${MONGODB_URI}
+#       - DATABASE_NAME=${DATABASE_NAME}
+#       - ELASTIC_APM_SERVER_URL=${ELASTIC_APM_SERVER_URL}
+#       - ELASTIC_APM_SECRET_TOKEN=${ELASTIC_APM_SECRET_TOKEN}
+#       - ELASTIC_APM_SERVICE_NAME=${ELASTIC_APM_SERVICE_NAME_STUDENT}
 
 #   teacher-service:
 #     image: nnanil0034/kindergarten-registry-teacher:${TAG:-latest}
@@ -25,11 +25,11 @@
 #     depends_on:
 #       - mongo
 #     environment:
-#       # - MONGODB_URI=${MONGODB_URI}
-#       # - DATABASE_NAME=${DATABASE_NAME}
-#       # - ELASTIC_APM_SERVER_URL=${ELASTIC_APM_SERVER_URL}
-#       # - ELASTIC_APM_SECRET_TOKEN=${ELASTIC_APM_SECRET_TOKEN}
-#       # - ELASTIC_APM_SERVICE_NAME=${ELASTIC_APM_SERVICE_NAME_TEACHER}
+#       - MONGODB_URI=${MONGODB_URI}
+#       - DATABASE_NAME=${DATABASE_NAME}
+#       - ELASTIC_APM_SERVER_URL=${ELASTIC_APM_SERVER_URL}
+#       - ELASTIC_APM_SECRET_TOKEN=${ELASTIC_APM_SECRET_TOKEN}
+#       - ELASTIC_APM_SERVICE_NAME=${ELASTIC_APM_SERVICE_NAME_TEACHER}
 
 #   employee-service:
 #     image: nanil0034/kindergarten-registry-employee:${TAG:-latest}
@@ -41,19 +41,19 @@
 #     depends_on:
 #       - mongo
 #     environment:
-#       # - MONGODB_URI=${MONGODB_URI}
-#       # - DATABASE_NAME=${DATABASE_NAME}
-#       # - ELASTIC_APM_SERVER_URL=${ELASTIC_APM_SERVER_URL}
-#       # - ELASTIC_APM_SECRET_TOKEN=${ELASTIC_APM_SECRET_TOKEN}
-#       # - ELASTIC_APM_SERVICE_NAME=${ELASTIC_APM_SERVICE_NAME_EMPLOYEE}
+#       - MONGODB_URI=${MONGODB_URI}
+#       - DATABASE_NAME=${DATABASE_NAME}
+#       - ELASTIC_APM_SERVER_URL=${ELASTIC_APM_SERVER_URL}
+#       - ELASTIC_APM_SECRET_TOKEN=${ELASTIC_APM_SECRET_TOKEN}
+#       - ELASTIC_APM_SERVICE_NAME=${ELASTIC_APM_SERVICE_NAME_EMPLOYEE}
 
 #   frontend:
 #     image: nanil0034/kindergarten-registry-frontend:${TAG:-latest}
 #     build: ./frontend
 #     ports:
-#       - "3000:3000"
+#       - "3000:80"
 #     environment:
-#       # - ELASTIC_APM_SERVER_URL=${ELASTIC_APM_SERVER_URL}
+#       - ELASTIC_APM_SERVER_URL=${ELASTIC_APM_SERVER_URL}
 #     stdin_open: true
 #     tty: true
 
@@ -63,9 +63,9 @@
 #     ports:
 #       - "27017:27017"
 #     environment:
-#       # MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
-#       # MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
-#       # MONGO_INITDB_DATABASE: ${MONGO_DATABASE}
+#       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
+#       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+#       MONGO_INITDB_DATABASE: ${MONGO_DATABASE}
 
 #     volumes:
 #       - mongo-data:/data/db
@@ -73,7 +73,7 @@
 # volumes:
 #   mongo-data:
 
-# Nabil Anto
+# # Nabil Anto
 
 
 
@@ -132,7 +132,7 @@ services:
     image: nanil0034/kindergarten-registry-frontend:${TAG:-latest}
     build: ./frontend
     ports:
-      - "3000:3000"
+      - "3000:80"
     stdin_open: true
     tty: true
 

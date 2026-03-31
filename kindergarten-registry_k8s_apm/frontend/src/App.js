@@ -7,15 +7,15 @@ import TeacherList from "./components/TeacherList";
 import EmployeeForm from "./components/EmployeeForm";
 import EmployeeList from "./components/EmployeeList";
 import "./App.css";
-// import { init as initApm } from '@elastic/apm-rum'
+import { init as initApm } from '@elastic/apm-rum'
 
-// // APM initialization
-// const apm = initApm({
-//   serviceName: 'kindergarten-frontend',
-//   serverUrl: 'http://192.168.121.224:8200',
-//   serviceVersion: '1.0.0',
-//   environment: 'development'
-// })
+// APM initialization
+const apm = initApm({
+  serviceName: 'kindergarten-frontend',
+  serverUrl: 'http://192.168.121.224:8200',
+  serviceVersion: '1.0.0',
+  environment: 'development'
+})
 
 
 
@@ -26,15 +26,10 @@ function App() {
   const [employees, setEmployees] = useState([]);
   const [activeTab, setActiveTab] = useState("students");
 
-
-  const STUDENT_SERVICE_URL = "http://10.70.57.52:30001/std";
-  const TEACHER_SERVICE_URL = "http://10.70.57.52:30002/tech";
-  const EMPLOYEE_SERVICE_URL = "http://10.70.57.52:30003/emp";
-
-  // API Base URLs for each service - ADD trailing slashes
-  // const STUDENT_SERVICE_URL = "http://nasirtechtalks.com/std"; //Here "/std" is define  ingress path to setect student-services
-  // const TEACHER_SERVICE_URL = "http://nasirtechtalks.com/tech"; //Here "/tech" is define  ingress path to setect teacher-services
-  // const EMPLOYEE_SERVICE_URL = "http://nasirtechtalks.com/emp";  //Here "/emp" is define  ingress path to setect employee-services
+  // API Base URLs for each service
+  const STUDENT_SERVICE_URL = "http://192.168.56.10:30001";
+  const TEACHER_SERVICE_URL = "http://192.168.56.10:30002";
+  const EMPLOYEE_SERVICE_URL ="http://192.168.56.10:30003";
 
   const fetchStudents = () => {
     fetch(`${STUDENT_SERVICE_URL}/students`)
@@ -207,7 +202,7 @@ function App() {
 
   return (
     <div style={{ padding: 20 }}>
-      <h1>Kindergarten School Registry</h1>
+      <h1>Kindergarten School Registry !!</h1>
 
       {/* Service Status */}
       <div style={{ marginBottom: "20px", fontSize: "14px", color: "#666" }}>

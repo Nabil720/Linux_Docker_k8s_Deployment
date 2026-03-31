@@ -14,15 +14,15 @@ var Client *mongo.Client
 var Database *mongo.Database
 
 func Connect() error {
-
+	// From Environment variables 
 	connectionString := os.Getenv("MONGODB_URI")
-	if connectionString == "" {
-		log.Fatal("MONGODB_URI environment variable is not set")
-	}
+	// if connectionString == "" {
+	// 	connectionString = "mongodb://mongo:27017" // default value
+	// }
 
 	databaseName := os.Getenv("DATABASE_NAME")
 	if databaseName == "" {
-		databaseName = "kindergarten"
+		databaseName = "kindergarten" // default value
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -35,7 +35,7 @@ func Connect() error {
 
 	Client = client
 	Database = client.Database(databaseName)
-	log.Println("Connected to MongoDB successfully!")
+	log.Printf("Connected to MongoDB successfully (database=%s)!\n", databaseName)
 	return nil
 }
 

@@ -163,3 +163,40 @@ Linux_Docker_k8s_Deployment/kindergarten-registry_Docker/
 
 ![Instance View](./Images/Screenshot%20from%202025-11-05%2018-35-38.png)
 
+
+
+
+
+
+
+
+
+
+```bash
+
+🔍 Final status check:
+  - Elasticsearch: ✅ Running
+  - Kibana: ✅ Running
+  - APM Server: ✅ Running (auth required)
+
+🎉 Setup complete!
+
+📋 Service URLs:
+  - Elasticsearch: http://localhost:9200
+  - Kibana: http://localhost:5601
+  - APM Server: http://localhost:8200
+
+🔐 Credentials:
+  - Username: elastic
+  - Password: HEtL6W7qxEUJcs20
+
+🔧 APM Configuration:
+  - APM Server URL: http://localhost:8200
+  - Secret Token: B7n5dCdEDTDppEbm
+
+✨ You can now configure your applications to send APM data to http://localhost:8200
+```
+
+
+
+
