@@ -264,6 +264,7 @@ kubectl port-forward service/frontend 8080:80
 4. Each Go service reads the injected values at startup:
 
 ```
+ # Vault Integration
 https://github.com/Nabil720/Hashicorp-Vault/blob/master/Vault_injector/README.md
 ```
 ---
