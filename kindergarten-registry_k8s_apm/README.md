@@ -192,6 +192,18 @@ docker push nanil0034/kindergarten-registry-employee:latest
 
 ---
 
+
+## APM Installation Guide
+
+```
+https://github.com/siyamsarker/elastic-apm-quickstart
+```
+## Vault Installation Guide
+
+```
+https://github.com/Nabil720/Hashicorp-Vault/tree/master/Vault_Apt  # Here the installation  is three node cluster , You can use standalone also
+```
+
 ## Kubernetes Deployment
 
 All manifests live in `k8s_manifest/`. Apply them to your cluster:
@@ -251,31 +263,9 @@ kubectl port-forward service/frontend 8080:80
 3. The Kubernetes manifest sets `VAULT_SKIP_VERIFY=true` to allow the Vault injector to work with self-signed TLS certificates.
 4. Each Go service reads the injected values at startup:
 
-```go
-// database/db.go
-connectionString := os.Getenv("MONGODB_URI")
-databaseName    := os.Getenv("DATABASE_NAME")
 ```
-
-### Kubernetes Manifest — Vault Config
-
-```yaml
-# student-service-deployment.yaml
-env:
-  - name: VAULT_SKIP_VERIFY
-    value: "true"
-  # Vault agent injects at runtime:
-  # MONGODB_URI=mongodb://myUser:myPassword@mongo:27017/kindergarten
-  # DATABASE_NAME=kindergarten
+https://github.com/Nabil720/Hashicorp-Vault/blob/master/Vault_injector/README.md
 ```
-
-### Secrets Stored in Vault
-
-| Secret Key | Value |
-|---|---|
-| `MONGODB_URI` | `mongodb://myUser:myPassword@mongo:27017/kindergarten` |
-| `DATABASE_NAME` | `kindergarten` |
-
 ---
 
 ## Elastic APM Integration
