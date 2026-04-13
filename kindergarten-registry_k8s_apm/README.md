@@ -253,21 +253,262 @@ kubectl port-forward service/frontend 8080:80
 ---
 
 ## HashiCorp Vault Integration
-
-**HashiCorp Vault** injects secrets into the Go microservices as **environment variables** at pod startup. The Go code reads them using `os.Getenv()` — no Vault API calls are made inside the application itself.
-
-### How It Works
-
-1. Vault stores the MongoDB credentials (`MONGODB_URI`, `DATABASE_NAME`) as secrets.
-2. At pod creation, the **Vault Agent Injector** injects those secrets as environment variables into each container.
-3. The Kubernetes manifest sets `VAULT_SKIP_VERIFY=true` to allow the Vault injector to work with self-signed TLS certificates.
-4. Each Go service reads the injected values at startup:
-
-```
- # Vault Integration
-https://github.com/Nabil720/Hashicorp-Vault/blob/master/Vault_injector/README.md
-```
 ---
+
+## Step 1: Prepare Vault Server
+
+### Terminal 1 (Vault Server):
+
+1. **Set the Vault address**  
+   Set the Vault server address (you may need to adjust the address based on your configuration):
+   ```bash
+   export VAULT_ADDR='http://localhost:8200'
+   ```
+ 2. **Login to Vault**
+    Use your Vault token to log in:
+    ```bash
+    vault login **
+    ```
+ 3. **Check Vault status**
+    Verify that the Vault server is running and healthy:
+    ```bash
+    vault status
+    ```
+4. **Enable the secret engine (if not enabled)**
+   If the kv-v2 secret engine is not enabled, enable it:
+   ```bash
+   vault secrets list | grep secret/ || vault secrets enable -path=kindergarten/config kv
+   ```
+5. **Create a test secret**
+   Create a test secret that will later be injected into the Kubernetes pod:
+   ```bash
+   # MongoDB credentials
+   vault kv put kindergarten/config/mongodb \
+   username="myUser" \
+   password="myPassword" \
+   database="kindergarten" \
+   uri="mongodb://myUser:myPassword@mongo:27017/kindergarten?authSource=admin"
+
+   # Elastic APM configuration
+   vault kv put kindergarten/config/apm \
+   server_url="http://192.168.121.224:8200" \
+   secret_token="your_apm_access_token" \
+   environment="production"
+
+   # Service-specific APM names
+   vault kv put kindergarten/config/services \
+   student="student-service" \
+   teacher="teacher-service" \
+   employee="employee-service"
+
+   # Service port configurations
+   vault kv put kindergarten/config/ports \
+   student=5001 \
+   teacher=5002 \
+   employee=5003
+
+   ```
+   6. **Verify the secret**
+      Retrieve and verify the secret:
+   ```bash
+   vault kv get kindergarten/config/mongodb
+   vault kv get kindergarten/config/apm
+   vault kv get kindergarten/config/services
+   vault kv get kindergarten/config/services
+   vault kv get kindergarten/config/ports
+   ```
+
+## Step 2: Install Vault Agent Injector
+
+### Terminal 2 (Kubernetes Master):
+
+1. **Add the Helm repository**
+   Add the HashiCorp Helm repository:
+   ```bash
+   helm repo add hashicorp https://helm.releases.hashicorp.com
+   helm repo update
+   ```
+2. **Install Vault Agent Injector**
+   Install the Vault Agent Injector into Kubernetes (Note: Vault server is external in this setup):
+   ```bash
+   helm install vault hashicorp/vault \
+   --set "injector.enabled=true" \
+   --set "server.enabled=false" \
+   --set "global.externalVaultAddr=http://192.168.61.164:8200" \  # vault server IP or HA-proxy ip (If we setup  vault as cluster)
+   --namespace vault \
+   --create-namespace
+   ```
+3. **Check installation**
+   ```bash
+   kubectl get pods -n vault
+   kubectl get svc -n vault
+   ```
+## Step 3: Collect Kubernetes Configuration
+
+### Terminal 2 (Kubernetes Master):
+
+1. **Get Kubernetes API URL**
+   ```bash
+   K8S_API=$(kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}')
+   echo "$K8S_API"
+   ```
+2. **Get proper CA Certificate**
+   ```bash
+   echo "2. CA_CERTIFICATE (proper format):"
+   if [ -f "/etc/kubernetes/pki/ca.crt" ]; then
+   sudo cat /etc/kubernetes/pki/ca.crt
+   else
+   kubectl config view --raw -o jsonpath='{.clusters[0].cluster.certificate-authority-data}' | base64 --decode
+   fi
+   echo ""
+   ```
+3. **Create Vault service account**
+   ```bash
+   kubectl create serviceaccount vault-auth 2>/dev/null || echo "Service account already exists"
+   ```
+4. **Create cluster role binding**
+   ```bash
+   kubectl create clusterrolebinding vault-auth-binding \
+   --clusterrole=system:auth-delegator \
+   --serviceaccount=default:vault-auth 2>/dev/null || echo "Cluster role binding already exists"
+   ```
+5. **Get  issuer**
+   ```bash
+   kubectl get --raw /.well-known/openid-configuration
+   ```
+## Step 4: Configure Vault Kubernetes Auth Method
+
+### Terminal 1 (Vault Server):
+
+1. **Enable Kubernetes authentication method**
+   Enable the Kubernetes authentication method in Vault:
+   ```bash
+   vault auth enable kubernetes
+   ```
+
+2. **Configure Vault with Kubernetes details**
+   ```bash
+   KUBERNETES_HOST="https://10.70.57.50:6443"  # Your Kubernetes API URL
+   CA_CERT="<CA_CERTIFICATE>"  # Kubernetes CA certificate
+
+   vault write auth/kubernetes/config \
+     kubernetes_host="$KUBERNETES_HOST" \
+     kubernetes_ca_cert="$CA_CERT" \
+     issuer="https://kubernetes.default.svc.cluster.local" \
+     disable_iss_validation=false
+   ```
+3. **Create a Vault policy**
+   Create a policy that allows read access to the secret:
+   ```bash
+   vault policy write kindergarten-policy - <<EOF
+   path "kindergarten/config/*" {
+   capabilities = ["create", "update", "read"]
+   }
+   EOF
+   ```
+4. **Create a role for Kubernetes authentication**
+   Bind the myapp-policy to the role and link it with the service account and namespace:
+   ```bash
+   vault write auth/kubernetes/role/kindergarten-role \
+   bound_service_account_names=vault-auth \
+   bound_service_account_namespaces=default \
+   policies=kindergarten-policy \
+   ttl=24
+   ```
+5. **Verify the configuration**
+   Check the configuration:
+   ```bash
+   vault read auth/kubernetes/config
+   vault read auth/kubernetes/role/kindergarten-role
+   ```
+## Step 5: Create and Apply Test Pod
+
+## Terminal 2 (Kubernetes Master):
+
+1. **Create a test pod YAML file**
+   Create a simple pod YAML file to test the secret injection:
+   ```bash
+   cat > teacher-service-deployment.yaml <<EOF
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+    name: teacher-service
+    labels:
+        app: teacher-service
+    spec:
+    replicas: 1
+    selector:
+        matchLabels:
+        app: teacher-service
+    template:
+        metadata:
+        labels:
+            app: teacher-service
+        annotations:
+            vault.hashicorp.com/agent-inject: "true"
+            vault.hashicorp.com/tls-skip-verify: "true"
+            vault.hashicorp.com/agent-pre-populate-only: "true"
+            vault.hashicorp.com/agent-inject-status: "update"
+            vault.hashicorp.com/role: "kindergarten-role"
+
+            # Inject all secrets into a single env file
+            vault.hashicorp.com/agent-inject-secret-env: "kindergarten/config/all-secrets"
+            vault.hashicorp.com/agent-inject-template-env: |
+            {{- with secret "kindergarten/config/mongodb" -}}
+            {{- range $k, $v := .Data }}
+            {{ $k }}={{ $v }}
+            {{- end }}
+            {{- end }}
+            {{- with secret "kindergarten/config/ports" -}}
+            {{- range $k, $v := .Data }}
+            {{ $k }}={{ $v }}
+            {{- end }}
+            {{- end }}
+            {{- with secret "kindergarten/config/services" -}}
+            {{- range $k, $v := .Data }}
+            {{ $k }}={{ $v }}
+            {{- end }}
+            {{- end }}
+        spec:
+        serviceAccountName: vault-auth
+        automountServiceAccountToken: true
+        containers:
+            - name: teacher-service
+            image: nanil0034/kindergarten-registry-teacher:112
+            imagePullPolicy: Always
+            ports:
+                - containerPort: 5002
+            command: ["/bin/sh"]
+            args:
+                - "-c"
+                - |
+                # Export all secrets from the single env file
+                if [ -f /vault/secrets/env ]; then
+                    export $(cat /vault/secrets/env | xargs)
+                fi
+
+                # Start the application
+                exec /app/main
+
+   ---
+   apiVersion: v1
+   kind: Service
+   metadata:
+   name: teacher-service
+   spec:
+   selector:
+      app: teacher-service
+   ports:
+      - protocol: TCP
+         port: 5002
+         targetPort: 5002
+         nodePort: 30002
+   type: NodePort
+   EOF
+
+   ```
+---
+
 
 ## Elastic APM Integration
 
